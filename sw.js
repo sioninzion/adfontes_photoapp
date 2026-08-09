@@ -9,7 +9,7 @@
 // CACHE_NAME 버전을 올려서 오래된 캐시를 확실히 폐기한다.
 // ---------------------------------------------------------------------------
 
-const CACHE_NAME = "life4cut-shell-v6";
+const CACHE_NAME = "life4cut-shell-v7";
 
 const PRECACHE_URLS = [
   "./",

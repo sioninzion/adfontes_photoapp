@@ -227,6 +227,8 @@ img {
   width: 15%;
   overflow: hidden;
   pointer-events: none;
+  display: flex;
+  flex-direction: row;
   -webkit-mask-image: linear-gradient(to bottom, transparent, #000 12%, #000 88%, transparent);
   mask-image: linear-gradient(to bottom, transparent, #000 12%, #000 88%, transparent);
 }
@@ -239,39 +241,28 @@ img {
   right: 0;
 }
 
-.verse-track {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
-
-.verse-rail--left .verse-track {
-  animation: verse-scroll-up 110s linear infinite;
-}
-
-.verse-rail--right .verse-track {
-  animation: verse-scroll-down 110s linear infinite;
-}
-
-.verse-slot {
+/* 한 옆면에 5개씩, 각자 다른 속도로 흐르는 가는 띠 */
+.verse-ribbon {
   position: relative;
-  width: 100%;
-  height: 170px;
-  flex-shrink: 0;
+  flex: 1 1 0;
+  height: 100%;
+  overflow: hidden;
 }
 
-.verse-text {
+.verse-ribbon-text {
   position: absolute;
   top: 50%;
   left: 50%;
-  width: 150px;
-  text-align: center;
-  font-size: 0.82rem;
-  line-height: 1.5;
+  white-space: nowrap;
+  font-size: 0.72rem;
+  line-height: 18px;
   color: var(--color-primary-dark);
   opacity: 0.55;
 }
 
+/* JS(Web Animations API)가 붙기 전까지 보일 기본 모습(자바스크립트가 실제
+   스크롤 애니메이션을 담당하며, 항상 "중앙정렬 -> 스크롤 -> 회전" 순서를
+   그대로 유지해야 화면상 이동이 순수한 수직 이동이 된다) */
 .verse-text--rotate-ccw {
   transform: translate(-50%, -50%) rotate(-90deg);
 }
@@ -288,27 +279,9 @@ img {
   font-family: var(--font-body);
 }
 
-.verse-ref {
-  display: inline-block;
-  margin-top: 4px;
-  font-size: 0.72em;
-  opacity: 0.8;
-}
-
-@keyframes verse-scroll-up {
-  0% { transform: translateY(0); }
-  100% { transform: translateY(-50%); }
-}
-
-@keyframes verse-scroll-down {
-  0% { transform: translateY(-50%); }
-  100% { transform: translateY(0); }
-}
-
 @media (prefers-reduced-motion: reduce) {
-  .verse-rail--left .verse-track,
-  .verse-rail--right .verse-track {
-    animation: none;
+  .verse-ribbon-text {
+    animation-play-state: paused !important;
   }
 }
 

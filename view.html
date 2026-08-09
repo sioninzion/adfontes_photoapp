@@ -56,13 +56,19 @@
     color: #ffffff;
     font-size: 1.15rem;
     font-weight: 700;
+    border: none;
     text-decoration: none;
     border-radius: 18px;
     box-shadow: 0 5px 0 #0068bd;
+    font-family: inherit;
+    -webkit-tap-highlight-color: transparent;
   }
   .btn:active {
     transform: translateY(3px);
     box-shadow: 0 2px 0 #0068bd;
+  }
+  .btn:disabled {
+    opacity: 0.6;
   }
   .hint {
     font-size: 0.9rem;
@@ -94,8 +100,8 @@
   <div class="photo-card">
     <img id="photo" alt="인생네컷 사진" />
   </div>
-  <a id="save-btn" class="btn" download="jayang-life4cut.jpg">사진 저장하기</a>
-  <p class="hint">저장 버튼을 눌러도 안 되면, 사진을 길게 눌러<br />"이미지 저장"을 선택해주세요</p>
+  <button id="save-btn" type="button" class="btn">사진 앱에 저장하기</button>
+  <p id="hint" class="hint">버튼을 누르면 나오는 공유 시트에서<br />"이미지 저장"을 선택하면 사진 앱에 바로 저장됩니다</p>
   <p class="brand">JAYANG YOUTH · 2026.08.13~15</p>
 </div>
 
@@ -109,28 +115,80 @@
     document.getElementById("error").classList.remove("hidden");
   }
 
+  function canShareFiles() {
+    if (!window.navigator || !navigator.canShare || !navigator.share) return false;
+    try {
+      var probe = new File(["x"], "probe.jpg", { type: "image/jpeg" });
+      return navigator.canShare({ files: [probe] });
+    } catch (err) {
+      return false;
+    }
+  }
+
   var params = new URLSearchParams(window.location.search);
   var src = params.get("src");
+  var photoUrl = null;
 
   if (!src) {
     showError();
   } else {
     try {
-      var url = new URL(src);
-      if (url.protocol !== "https:" && url.protocol !== "http:") throw new Error("invalid protocol");
+      var parsed = new URL(src);
+      if (parsed.protocol !== "https:" && parsed.protocol !== "http:") throw new Error("invalid protocol");
+      photoUrl = parsed.href;
 
       var img = document.getElementById("photo");
       img.onerror = showError;
-      img.src = url.href;
-
-      // Cloudinary fl_attachment 플래그를 넣으면 브라우저가 새 탭에 열지 않고
-      // 바로 다운로드하도록 Content-Disposition 헤더를 붙여준다.
-      var saveBtn = document.getElementById("save-btn");
-      saveBtn.href = url.href.replace("/upload/", "/upload/fl_attachment/");
+      img.src = photoUrl;
     } catch (err) {
       showError();
     }
   }
+
+  var saveBtn = document.getElementById("save-btn");
+  var hintEl = document.getElementById("hint");
+  var shareSupported = canShareFiles();
+
+  if (!shareSupported) {
+    hintEl.textContent = '사진을 길게 눌러 "사진 앱에 저장" 또는 "이미지 저장"을 선택해주세요';
+  }
+
+  saveBtn.addEventListener("click", async function () {
+    if (!photoUrl) return;
+    if (saveBtn.disabled) return;
+
+    if (!shareSupported) {
+      // 공유 시트를 지원하지 않는 기기: 이미지를 새 탭으로 열어 길게 눌러
+      // 저장할 수 있게 한다 (iOS/Android 모두 길게 누르면 사진 앱에 저장됨).
+      window.open(photoUrl, "_blank");
+      return;
+    }
+
+    saveBtn.disabled = true;
+    var originalText = saveBtn.textContent;
+    saveBtn.textContent = "사진을 불러오는 중...";
+
+    try {
+      var res = await fetch(photoUrl, { mode: "cors" });
+      if (!res.ok) throw new Error("이미지를 불러오지 못했습니다.");
+      var blob = await res.blob();
+      var file = new File([blob], "jayang-life4cut.jpg", { type: blob.type || "image/jpeg" });
+
+      if (navigator.canShare({ files: [file] })) {
+        await navigator.share({ files: [file] });
+      } else {
+        window.open(photoUrl, "_blank");
+      }
+    } catch (err) {
+      // 사용자가 공유 시트를 취소한 경우(AbortError)는 오류가 아니므로 조용히 넘어간다.
+      if (!err || err.name !== "AbortError") {
+        window.open(photoUrl, "_blank");
+      }
+    } finally {
+      saveBtn.disabled = false;
+      saveBtn.textContent = originalText;
+    }
+  });
 </script>
 </body>
 </html>

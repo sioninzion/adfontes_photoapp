@@ -237,7 +237,8 @@ img {
 
 /* -------------------------------------------------------------------------
    장식 오브젝트 (구름/태양/반짝임/God's kids 삽화)
-   모든 화면에서 동일한 규칙: 0.6초 간격으로 -10deg <-> +10deg 사이를 흔든다.
+   모든 화면에서 동일한 규칙: 0.6초 간격으로 -7deg <-> +7deg로 뚝뚝 바뀐다
+   (중간 각도로 부드럽게 보간되지 않도록 steps()를 사용한다).
    순수 장식이라 pointer-events:none + aria-hidden 처리한다.
    ------------------------------------------------------------------------- */
 .decor {
@@ -247,12 +248,13 @@ img {
   -webkit-user-select: none;
   user-select: none;
   -webkit-user-drag: none;
-  animation: decor-wobble 1.2s ease-in-out infinite;
+  animation: decor-wobble 1.2s steps(1, end) infinite;
 }
 
 @keyframes decor-wobble {
-  0%, 100% { transform: rotate(-10deg); }
-  50% { transform: rotate(10deg); }
+  0% { transform: rotate(-7deg); }
+  50% { transform: rotate(7deg); }
+  100% { transform: rotate(-7deg); }
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -261,24 +263,37 @@ img {
   }
 }
 
+/* 태양 +30%, 구름 +20%, God's kids +40%를 두 번 적용한 누적 크기 */
 .decor-sun {
-  width: clamp(64px, 9vw, 120px);
+  width: clamp(108px, 15.2vw, 203px);
   height: auto;
 }
 
 .decor-cloud {
-  width: clamp(72px, 10vw, 130px);
+  width: clamp(103px, 14.4vw, 187px);
   height: auto;
 }
 
-/* "인생네컷" 제목 한 글자 크기 정도 */
+/* "인생네컷" 제목 한 글자 크기 정도 (particle-1) */
 .decor-particle {
   width: clamp(32px, 5.5vw, 56px);
   height: auto;
 }
 
+/* particle-2는 글자/버튼을 가리지 않는 선에서 조금 더 크게 */
+.decor-particle-big {
+  width: clamp(48px, 7.5vw, 82px);
+  height: auto;
+}
+
 .decor-godskid {
-  width: clamp(120px, 16vw, 220px);
+  width: clamp(235px, 31.4vw, 431px);
+  height: auto;
+}
+
+/* 구름보다 살짝 크게 */
+.decor-camera {
+  width: clamp(118px, 16.5vw, 215px);
   height: auto;
 }
 
@@ -286,18 +301,20 @@ img {
    (바닥/왼쪽 끝에 딱 붙지 않도록 여유를 둔다) */
 .decor-start-sun { top: 4%; left: 6%; }
 .decor-start-cloud { top: 5%; right: 7%; }
-.decor-start-godskid { bottom: 14%; left: 13%; }
+.decor-start-cloud-2 { top: 1%; left: 36%; }
+.decor-start-godskid { top: 55%; left: 1%; bottom: auto; }
+.decor-start-camera { top: 48%; right: 4%; }
 
 .decor-start-particle-1 { top: 16%; left: 3%; }
-.decor-start-particle-2 { top: 42%; left: 2%; }
+.decor-start-particle-2 { top: 40%; left: 1%; }
 .decor-start-particle-3 { top: 70%; left: 4.5%; }
-.decor-start-particle-4 { top: 18%; right: 3%; }
-.decor-start-particle-5 { top: 46%; right: 2%; }
+.decor-start-particle-4 { top: 16%; right: 2%; }
+.decor-start-particle-5 { top: 44%; right: 0.5%; }
 .decor-start-particle-6 { top: 74%; right: 4.5%; }
 
 /* 촬영/선택 화면: 더 작게, 가로 모드에서만 태양/구름 표시, 파티클은 항상 여백에 */
-.decor-sun--compact { width: clamp(36px, 4.5vw, 64px); height: auto; }
-.decor-cloud--compact { width: clamp(40px, 5vw, 72px); height: auto; }
+.decor-sun--compact { width: clamp(61px, 7.7vw, 108px); height: auto; }
+.decor-cloud--compact { width: clamp(58px, 7.2vw, 103px); height: auto; }
 
 .decor-capsel-sun { top: 4px; left: 4px; }
 .decor-capsel-cloud { top: 4px; right: 4px; }

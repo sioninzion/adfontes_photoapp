@@ -85,9 +85,8 @@ function loadOverlayImage(src) {
  * @param {number} options.height
  * @param {Array<HTMLImageElement|HTMLCanvasElement|null>} options.images - 길이 4, 위->아래 순서
  * @param {object} options.frame - FRAMES 항목
- * @param {string} options.filterCss - ctx.filter 값
  */
-export async function renderComposite(ctx, { width, height, images, frame, filterCss }) {
+export async function renderComposite(ctx, { width, height, images, frame }) {
   const layout = computeLayout(width, height);
   const cornerRadius = width * 0.012;
 
@@ -108,11 +107,9 @@ export async function renderComposite(ctx, { width, height, images, frame, filte
     ctx.clip();
 
     if (image) {
-      ctx.filter = filterCss || "none";
       const srcW = image.naturalWidth || image.width;
       const srcH = image.naturalHeight || image.height;
       drawImageCover(ctx, image, srcW, srcH, slot.x, slot.y, slot.w, slot.h);
-      ctx.filter = "none";
     } else {
       ctx.fillStyle = "#d9d9d9";
       ctx.fillRect(slot.x, slot.y, slot.w, slot.h);
@@ -141,15 +138,21 @@ export async function renderComposite(ctx, { width, height, images, frame, filte
   }
 
   if (!overlayApplied) {
+    // 커스텀 폰트가 아직 로드되지 않았으면 Canvas 텍스트는 조용히 기본 폰트로
+    // 그려져 버리므로(에러 없이 무시됨), 그리기 전에 로딩이 끝나길 기다린다.
+    if (document.fonts && document.fonts.ready) {
+      await document.fonts.ready;
+    }
+
     ctx.fillStyle = frame.textColor;
     ctx.textAlign = "center";
     ctx.textBaseline = "middle";
 
     const footerCenterY = layout.footerY + layout.footerHeight * 0.42;
-    ctx.font = `700 ${Math.round(height * 0.024)}px "Pretendard", "Apple SD Gothic Neo", -apple-system, sans-serif`;
+    ctx.font = `700 ${Math.round(height * 0.024)}px "OkDanDan", "Pretendard", "Apple SD Gothic Neo", sans-serif`;
     ctx.fillText(CONFIG.event.footer, width / 2, footerCenterY);
 
-    ctx.font = `500 ${Math.round(height * 0.015)}px "Pretendard", "Apple SD Gothic Neo", -apple-system, sans-serif`;
+    ctx.font = `400 ${Math.round(height * 0.015)}px "OngeulipUiyeon", "Pretendard", "Apple SD Gothic Neo", sans-serif`;
     ctx.fillStyle = frame.accentColor;
     ctx.fillText(CONFIG.event.subFooter, width / 2, footerCenterY + height * 0.03);
   }

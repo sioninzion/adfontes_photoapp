@@ -46,8 +46,10 @@
 <!-- ======================= 촬영 화면 ======================= -->
 <section id="screen-capture" class="screen">
   <div id="capture-stage" class="capture-stage">
-    <video id="capture-video" class="camera-video" autoplay playsinline muted></video>
-    <div id="capture-flash" class="capture-flash" aria-hidden="true"></div>
+    <div id="capture-frame" class="capture-frame">
+      <video id="capture-video" class="camera-video" autoplay playsinline muted></video>
+      <div id="capture-flash" class="capture-flash" aria-hidden="true"></div>
+    </div>
     <div class="capture-overlay-top">
       <span id="capture-progress" class="capture-progress"></span>
     </div>
@@ -82,7 +84,7 @@
   <button id="select-next-button" type="button" class="btn btn-primary btn-huge" disabled>4장을 선택해주세요</button>
 </section>
 
-<!-- ======================= 편집 화면 (프레임 + 필터) ======================= -->
+<!-- ======================= 편집 화면 (프레임) ======================= -->
 <section id="screen-edit" class="screen">
   <div class="edit-layout">
     <div class="edit-preview-pane">
@@ -92,10 +94,6 @@
       <div class="option-group">
         <h2 class="option-group-title">프레임</h2>
         <div id="edit-frame-list" class="option-list"></div>
-      </div>
-      <div class="option-group">
-        <h2 class="option-group-title">필터</h2>
-        <div id="edit-filter-list" class="option-list"></div>
       </div>
       <button id="edit-finish-button" type="button" class="btn btn-primary btn-huge">사진 완성하기</button>
     </div>

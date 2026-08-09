@@ -9,7 +9,8 @@ import { computeCoverSourceRect, canvasToBlob, wait, nextId } from "./utils.js";
 export class CaptureScreen {
   /**
    * @param {object} refs
-   * @param {HTMLElement} refs.stageEl - 비디오를 담는 컨테이너(.capture-stage)
+   * @param {HTMLElement} refs.stageEl - 비디오를 담는 바깥 컨테이너(.capture-stage)
+   * @param {HTMLElement} refs.frameEl - 정확한 비율로 크기가 강제되는 안쪽 래퍼(.capture-frame)
    * @param {HTMLVideoElement} refs.videoEl
    * @param {HTMLElement} refs.countdownEl
    * @param {HTMLElement} refs.progressEl
@@ -19,6 +20,7 @@ export class CaptureScreen {
    */
   constructor(refs) {
     this.stageEl = refs.stageEl;
+    this.frameEl = refs.frameEl;
     this.videoEl = refs.videoEl;
     this.countdownEl = refs.countdownEl;
     this.progressEl = refs.progressEl;
@@ -53,9 +55,16 @@ export class CaptureScreen {
     this.videoEl.addEventListener("loadedmetadata", () => this._fitVideoBox());
   }
 
-  /** .capture-stage 안에서 captureAspectRatio를 유지하는 최대 크기를 계산해 적용한다. */
+  /**
+   * .capture-stage 안에서 captureAspectRatio를 유지하는 최대 크기를 계산해
+   * .capture-frame(일반 div)에 강제 적용한다. <video> 자체에 width/height를
+   * 직접 주지 않는 이유는 Safari에서 비디오 스트림이 붙은 <video>의 인라인
+   * 크기가 무시되거나 스트림 자체의 비율로 되돌아가는 경우가 있기 때문이다.
+   * 항상 신뢰할 수 있는 일반 div의 크기를 강제하고, video는 그 안에서
+   * width:100%/height:100%로 채우기만 한다(CSS에서 처리).
+   */
   _fitVideoBox() {
-    if (!this.stageEl) return;
+    if (!this.stageEl || !this.frameEl) return;
     const cw = this.stageEl.clientWidth;
     const ch = this.stageEl.clientHeight;
     if (!cw || !ch) return;
@@ -68,8 +77,8 @@ export class CaptureScreen {
       w = h * ratio;
     }
 
-    this.videoEl.style.width = `${Math.round(w)}px`;
-    this.videoEl.style.height = `${Math.round(h)}px`;
+    this.frameEl.style.width = `${Math.round(w)}px`;
+    this.frameEl.style.height = `${Math.round(h)}px`;
   }
 
   /** 새 세션을 위해 상태와 썸네일을 초기화한다. 기존 Object URL은 정리한다. */

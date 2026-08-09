@@ -1,9 +1,9 @@
 // ---------------------------------------------------------------------------
 // 전체 화면 전환과 상태를 관리하는 메인 컨트롤러.
-// 시작 -> 촬영(6장) -> 선택(4장) -> 편집(프레임/필터) -> 업로드 -> 결과(QR)
+// 시작 -> 촬영(6장) -> 선택(4장) -> 편집(프레임) -> 업로드 -> 결과(QR)
 // ---------------------------------------------------------------------------
 
-import { CONFIG, FRAMES, FILTERS } from "./config.js";
+import { CONFIG, FRAMES } from "./config.js";
 import { CameraManager } from "./camera.js";
 import { CaptureScreen } from "./capture.js";
 import { SelectionScreen } from "./selection.js";
@@ -33,6 +33,7 @@ const cameraErrorMessage = document.getElementById("camera-error-message");
 const cameraErrorRetryButton = document.getElementById("camera-error-retry-button");
 
 const captureStage = document.getElementById("capture-stage");
+const captureFrame = document.getElementById("capture-frame");
 const captureVideo = document.getElementById("capture-video");
 const captureProgress = document.getElementById("capture-progress");
 const captureCountdown = document.getElementById("capture-countdown");
@@ -45,7 +46,6 @@ const selectNextButton = document.getElementById("select-next-button");
 
 const editPreviewCanvas = document.getElementById("edit-preview-canvas");
 const editFrameList = document.getElementById("edit-frame-list");
-const editFilterList = document.getElementById("edit-filter-list");
 const editFinishButton = document.getElementById("edit-finish-button");
 
 const uploadLoadingPanel = document.getElementById("upload-loading");
@@ -90,6 +90,7 @@ cameraManager.onError = (err) => {
 
 const captureScreen = new CaptureScreen({
   stageEl: captureStage,
+  frameEl: captureFrame,
   videoEl: captureVideo,
   countdownEl: captureCountdown,
   progressEl: captureProgress,
@@ -104,11 +105,10 @@ const selectionScreen = new SelectionScreen(selectCellEls, selectNextButton, (co
   else selectNextButton.textContent = `${count} / ${CONFIG.selectedPhotoCount} 선택됨`;
 });
 
-const { frameButtons, filterButtons } = buildEditorButtons();
+const frameButtons = buildEditorButtons();
 const editorScreen = new EditorScreen({
   previewCanvas: editPreviewCanvas,
-  frameButtons,
-  filterButtons
+  frameButtons
 });
 
 // ---------------------------------------------------------------------------
@@ -132,10 +132,10 @@ function showGlobalError(message) {
 }
 
 // ---------------------------------------------------------------------------
-// 프레임 / 필터 버튼 동적 생성 (config.js만 수정하면 자동 반영)
+// 프레임 버튼 동적 생성 (config.js만 수정하면 자동 반영)
 // ---------------------------------------------------------------------------
 function buildEditorButtons() {
-  const frameButtonsArr = FRAMES.map((frame) => {
+  return FRAMES.map((frame) => {
     const btn = document.createElement("button");
     btn.type = "button";
     btn.className = "option-btn frame-btn";
@@ -146,27 +146,6 @@ function buildEditorButtons() {
     `;
     editFrameList.appendChild(btn);
     return btn;
-  });
-
-  const filterButtonsArr = FILTERS.map((filter) => {
-    const btn = document.createElement("button");
-    btn.type = "button";
-    btn.className = "option-btn filter-btn";
-    btn.dataset.filterId = filter.id;
-    btn.innerHTML = `
-      <span class="filter-thumb" data-filter-thumb style="filter:${filter.css}"></span>
-      <span class="option-label">${filter.name}</span>
-    `;
-    editFilterList.appendChild(btn);
-    return btn;
-  });
-
-  return { frameButtons: frameButtonsArr, filterButtons: filterButtonsArr };
-}
-
-function updateFilterThumbnails(previewUrl) {
-  document.querySelectorAll("#edit-filter-list [data-filter-thumb]").forEach((el) => {
-    el.style.backgroundImage = `url(${previewUrl})`;
   });
 }
 
@@ -229,7 +208,6 @@ async function handleSelectNext() {
   editFinishButton.disabled = true;
   try {
     await editorScreen.init(state.selectedOrder);
-    if (state.selectedOrder[0]) updateFilterThumbnails(state.selectedOrder[0].url);
   } catch (err) {
     showGlobalError("사진을 불러오는 중 문제가 발생했습니다.");
   } finally {
@@ -277,8 +255,7 @@ async function generateFinalImage() {
     width: CONFIG.finalWidth,
     height: CONFIG.finalHeight,
     images: editorScreen.images,
-    frame: editorScreen.getFrame(),
-    filterCss: editorScreen.getFilter().css
+    frame: editorScreen.getFrame()
   });
 
   return canvasToBlob(canvas, "image/jpeg", CONFIG.jpegQuality);
@@ -425,5 +402,19 @@ window.addEventListener("offline", () => {
 // 썸네일 그리드(CSS aspect-ratio)가 실제 촬영 비율과 항상 같도록 동기화한다.
 // (촬영 중인 비디오 박스 자체는 CaptureScreen이 JS로 직접 크기를 계산해 강제한다)
 document.documentElement.style.setProperty("--capture-aspect", String(CONFIG.captureAspectRatio));
+
+// 버튼/제목용 커스텀 폰트를 미리 로드한다. Canvas 텍스트(최종 합성 하단 문구)는
+// 폰트 로딩이 끝나기 전에 그리면 조용히 기본 폰트로 대체되므로, 편집 화면에
+// 도달하기 전에 최대한 일찍 로딩을 시작해둔다.
+if (typeof FontFace !== "undefined") {
+  Promise.all([
+    new FontFace("OkDanDan", 'url("assets/fonts/OkDanDan-Bold.ttf")', { weight: "700" }).load(),
+    new FontFace("OngeulipUiyeon", 'url("assets/fonts/OngeulipUiyeon-Regular.ttf")', { weight: "400" }).load()
+  ])
+    .then((fonts) => fonts.forEach((font) => document.fonts.add(font)))
+    .catch(() => {
+      /* 로딩 실패해도 CSS @font-face의 시스템 폰트 fallback으로 정상 동작한다 */
+    });
+}
 
 showScreen("start");

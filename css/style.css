@@ -3,6 +3,24 @@
    우선순위: 사진 > 카운트다운 > 핵심 버튼 > 장식
    ========================================================================== */
 
+/* 버튼/제목 전용: Ok단단체 (OKTICON/OkFont, 상업용 무료) */
+@font-face {
+  font-family: "OkDanDan";
+  src: url("../assets/fonts/OkDanDan-Bold.ttf") format("truetype");
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* 본문 전용: 온글잎 의연체 (VoyagerX, 상업용 무료) */
+@font-face {
+  font-family: "OngeulipUiyeon";
+  src: url("../assets/fonts/OngeulipUiyeon-Regular.ttf") format("truetype");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
 :root {
   --color-bg: #fbf9f2;
   --color-surface: #ffffff;
@@ -18,6 +36,10 @@
   --safe-left: env(safe-area-inset-left, 0px);
   --safe-right: env(safe-area-inset-right, 0px);
   --capture-aspect: 1.4;
+
+  /* 버튼/제목 = 단단체, 나머지 본문 = 의연체 */
+  --font-heading: "OkDanDan", "Pretendard", "Apple SD Gothic Neo", sans-serif;
+  --font-body: "OngeulipUiyeon", "Pretendard", "Apple SD Gothic Neo", sans-serif;
 }
 
 * {
@@ -41,7 +63,7 @@ body {
   overscroll-behavior: none;
   background: var(--color-bg);
   color: var(--color-text);
-  font-family: "Pretendard", "Apple SD Gothic Neo", -apple-system, BlinkMacSystemFont, "Malgun Gothic", sans-serif;
+  font-family: var(--font-body);
   -webkit-user-select: none;
   user-select: none;
   -webkit-touch-callout: none;
@@ -86,6 +108,7 @@ img {
   appearance: none;
   border: none;
   border-radius: 24px;
+  font-family: var(--font-heading);
   font-weight: 700;
   cursor: pointer;
   transition: transform 0.08s ease, background-color 0.15s ease, opacity 0.15s ease;
@@ -146,6 +169,7 @@ img {
 }
 
 .event-title {
+  font-family: var(--font-heading);
   font-size: clamp(2.4rem, 6vw, 4.6rem);
   line-height: 1.25;
   font-weight: 800;
@@ -215,18 +239,26 @@ img {
   justify-content: center;
 }
 
-.camera-video {
+.capture-frame {
   /* 정확한 width/height는 capture.js가 CONFIG.captureAspectRatio 기준으로
-     매번 JS에서 픽셀 단위로 계산해 강제한다 (세로/가로 회전에도 항상 동일
-     비율을 보장하기 위함 - CSS aspect-ratio만으로는 브라우저마다 flex 자식
-     크기 계산이 달라질 수 있어 신뢰하지 않는다). 아래 값은 계산 전 잠깐
-     보일 수 있는 기본값이다.
+     매번 JS에서 픽셀 단위로 계산해 이 래퍼 div에 직접 강제한다 (세로/가로
+     회전에도 항상 동일 비율을 보장하기 위함). <video> 엘리먼트 자체의
+     width/height를 JS로 조작하면 Safari(WebKit)에서 반영되지 않거나 실제
+     스트림 비율로 되돌아가는 경우가 있어, 항상 신뢰할 수 있는 일반 div를
+     정확한 크기로 만들고 video는 그 안을 100%로 채우기만 하도록 분리했다.
   */
-  max-width: 100%;
-  max-height: 100%;
-  object-fit: cover;
+  position: relative;
+  overflow: hidden;
   background: #111;
   border-radius: 20px;
+}
+
+.camera-video {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
   transform: scaleX(-1);
 }
 
@@ -235,7 +267,6 @@ img {
   inset: 0;
   background: #ffffff;
   opacity: 0;
-  border-radius: 20px;
   pointer-events: none;
 }
 
@@ -262,6 +293,7 @@ img {
   padding: 10px 28px;
   background: rgba(0, 0, 0, 0.45);
   color: #ffffff;
+  font-family: var(--font-heading);
   font-weight: 700;
   font-size: clamp(1rem, 1.8vw, 1.4rem);
   border-radius: 999px;
@@ -278,6 +310,7 @@ img {
 }
 
 .capture-countdown {
+  font-family: var(--font-heading);
   font-size: clamp(5rem, 16vw, 11rem);
   font-weight: 800;
   color: #ffffff;
@@ -392,7 +425,7 @@ img {
 }
 
 /* -------------------------------------------------------------------------
-   편집 화면 (프레임 + 필터)
+   편집 화면 (프레임)
    ------------------------------------------------------------------------- */
 #screen-edit {
   padding: calc(20px + var(--safe-top)) calc(20px + var(--safe-right)) calc(20px + var(--safe-bottom)) calc(20px + var(--safe-left));
@@ -436,6 +469,7 @@ img {
 }
 
 .option-group-title {
+  font-family: var(--font-heading);
   font-size: 1.15rem;
   font-weight: 700;
   margin: 0 0 10px;
@@ -457,6 +491,7 @@ img {
   border: 3px solid var(--color-border);
   border-radius: 16px;
   background: var(--color-surface);
+  font-family: var(--font-heading);
   cursor: pointer;
   min-height: 92px;
   justify-content: center;
@@ -478,14 +513,6 @@ img {
   height: 40px;
   border-radius: 10px;
   border: 2px solid var(--color-border);
-  display: block;
-}
-
-.filter-thumb {
-  width: 48px;
-  height: 48px;
-  border-radius: 10px;
-  background: #cfcfcf center/cover no-repeat;
   display: block;
 }
 

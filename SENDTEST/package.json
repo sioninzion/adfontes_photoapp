@@ -1,0 +1,11 @@
+{
+  "name": "qr-beam",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Wi-Fi, 인터넷, Bluetooth 없이 화면과 카메라만으로 파일을 전송하는 오프라인 QR 파일 전송 PWA",
+  "scripts": {
+    "dev": "npx --yes http-server . -p 8080 -c-1",
+    "start": "npm run dev"
+  },
+  "license": "MIT"
+}

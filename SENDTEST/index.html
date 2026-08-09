@@ -1,0 +1,207 @@
+<meta charset="UTF-8">
+<title>QR Beam — 오프라인 QR 파일 전송</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1">
+<meta name="description" content="Wi-Fi·인터넷·블루투스 없이 화면과 카메라만으로 기기 간 파일을 전송하는 오프라인 QR 파일 전송 웹앱">
+<meta name="theme-color" content="#0a0a0c">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icons/icon-192.png">
+<link rel="apple-touch-icon" href="icons/icon-192.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="QR Beam">
+<link rel="stylesheet" href="src/styles/style.css">
+
+<div id="app">
+
+  <!-- ===================== HOME ===================== -->
+  <section class="screen active" id="screen-home">
+    <div class="home-wrap">
+      <div class="home-brand">
+        <div class="home-logo">◱</div>
+        <h1>QR Beam</h1>
+        <p class="home-tagline">화면과 카메라만으로, 완전 오프라인 파일 전송</p>
+      </div>
+      <div class="home-actions">
+        <button class="big-btn big-btn-primary" id="btn-go-send">
+          <span class="big-btn-icon">↑</span>
+          <span>파일 보내기</span>
+        </button>
+        <button class="big-btn big-btn-secondary" id="btn-go-receive">
+          <span class="big-btn-icon">↓</span>
+          <span>파일 받기</span>
+        </button>
+      </div>
+      <p class="privacy-note">파일은 서버에 업로드되지 않습니다.<br>화면과 카메라를 통해 기기 간 직접 전송됩니다.</p>
+    </div>
+  </section>
+
+  <!-- ===================== SENDER: FILE SELECT ===================== -->
+  <section class="screen" id="screen-send-select">
+    <header class="screen-header">
+      <button class="icon-btn" data-nav="screen-home" aria-label="뒤로">←</button>
+      <h2>파일 보내기</h2>
+      <span class="icon-btn-spacer"></span>
+    </header>
+
+    <div class="screen-body">
+      <input type="file" id="file-input" hidden>
+      <label for="file-input" class="dropzone" id="dropzone">
+        <div class="dropzone-icon">📄</div>
+        <div class="dropzone-text">탭하여 파일 선택</div>
+        <div class="dropzone-sub">사진, 동영상, PDF, ZIP 등 모든 파일</div>
+      </label>
+
+      <div class="file-card" id="file-card" hidden>
+        <div class="file-card-row">
+          <div class="file-card-icon" id="file-card-icon">📄</div>
+          <div class="file-card-meta">
+            <div class="file-card-name" id="file-card-name">-</div>
+            <div class="file-card-sub" id="file-card-sub">-</div>
+          </div>
+        </div>
+
+        <div class="option-group" id="photo-mode-group" hidden>
+          <div class="option-label">전송 방식</div>
+          <div class="segmented" id="photo-mode-segmented">
+            <button class="segmented-btn active" data-value="original">원본 전송</button>
+            <button class="segmented-btn" data-value="fast">빠른 사진 전송</button>
+          </div>
+          <p class="option-hint" id="compress-hint" hidden></p>
+        </div>
+
+        <div class="option-group">
+          <div class="option-label">전송 모드</div>
+          <div class="segmented" id="transfer-mode-segmented">
+            <button class="segmented-btn" data-value="stable">안정</button>
+            <button class="segmented-btn active" data-value="standard">표준</button>
+            <button class="segmented-btn" data-value="fast">고속</button>
+          </div>
+          <p class="option-hint">안정: 느리지만 확실 · 고속: 빠르지만 인식률 낮음</p>
+        </div>
+
+        <button class="big-btn big-btn-primary" id="btn-start-transmit">전송 시작</button>
+      </div>
+
+      <p class="error-text" id="send-error" hidden></p>
+      <p class="privacy-note">파일은 서버에 업로드되지 않습니다.</p>
+    </div>
+  </section>
+
+  <!-- ===================== SENDER: TRANSMIT (QR) ===================== -->
+  <section class="screen" id="screen-send-transmit">
+    <div class="transmit-wrap">
+      <div class="transmit-topbar">
+        <button class="icon-btn" id="btn-stop-transmit" aria-label="중지">✕</button>
+        <div class="transmit-filename" id="transmit-filename">-</div>
+        <button class="icon-btn" id="btn-fullscreen" aria-label="전체화면">⤢</button>
+      </div>
+
+      <div class="qr-stage">
+        <canvas id="qr-canvas"></canvas>
+      </div>
+
+      <div class="transmit-status">
+        <div class="transmit-status-line" id="transmit-status-line">전송 중</div>
+        <div class="transmit-progress-track">
+          <div class="transmit-progress-fill" id="transmit-progress-fill"></div>
+        </div>
+        <div class="transmit-stats-row">
+          <span id="transmit-frame-counter">0 / 0</span>
+          <span id="transmit-cycle">Cycle 1</span>
+          <span id="transmit-fps">- QR/s</span>
+        </div>
+        <div class="transmit-stats-row transmit-stats-row-sub">
+          <span id="transmit-bytes">0 B 전송됨</span>
+        </div>
+      </div>
+
+      <div class="transmit-controls">
+        <button class="pill-btn" id="btn-pause-transmit">일시정지</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== RECEIVER: INTRO ===================== -->
+  <section class="screen" id="screen-receive-intro">
+    <header class="screen-header">
+      <button class="icon-btn" data-nav="screen-home" aria-label="뒤로">←</button>
+      <h2>파일 받기</h2>
+      <span class="icon-btn-spacer"></span>
+    </header>
+    <div class="screen-body screen-body-center">
+      <div class="intro-icon">📷</div>
+      <p class="intro-text">카메라로 상대방 화면의 QR 코드를<br>비추면 자동으로 파일을 받습니다.</p>
+      <p class="privacy-note">파일은 서버에 업로드되지 않습니다.<br>화면과 카메라를 통해 기기 간 직접 전송됩니다.</p>
+      <button class="big-btn big-btn-primary" id="btn-start-camera">카메라 시작</button>
+      <p class="error-text" id="receive-intro-error" hidden></p>
+    </div>
+  </section>
+
+  <!-- ===================== RECEIVER: SCAN ===================== -->
+  <section class="screen" id="screen-receive-scan">
+    <video id="camera-video" autoplay playsinline muted></video>
+    <canvas id="scan-roi-canvas" hidden></canvas>
+
+    <div class="scan-overlay">
+      <div class="scan-topbar">
+        <button class="icon-btn icon-btn-light" id="btn-cancel-scan" aria-label="취소">✕</button>
+        <div class="scan-session-label" id="scan-session-label"></div>
+        <span class="icon-btn-spacer"></span>
+      </div>
+
+      <div class="viewfinder" id="viewfinder">
+        <span class="corner corner-tl"></span>
+        <span class="corner corner-tr"></span>
+        <span class="corner corner-bl"></span>
+        <span class="corner corner-br"></span>
+      </div>
+
+      <div class="scan-status-panel" id="scan-status-panel">
+        <div class="scan-status-text" id="scan-status-text">QR을 프레임 안에 맞춰주세요</div>
+
+        <div class="scan-progress-block" id="scan-progress-block" hidden>
+          <div class="scan-filename" id="scan-filename">-</div>
+          <div class="transmit-progress-track">
+            <div class="transmit-progress-fill" id="scan-progress-fill"></div>
+          </div>
+          <div class="transmit-stats-row">
+            <span id="scan-chunk-counter">0 / 0 chunks</span>
+            <span id="scan-percent">0%</span>
+          </div>
+          <div class="transmit-stats-row transmit-stats-row-sub">
+            <span id="scan-received-bytes">0 B / 0 B</span>
+            <span id="scan-speed">- KB/s</span>
+          </div>
+          <div class="transmit-stats-row transmit-stats-row-sub">
+            <span id="scan-eta">-</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== RECEIVER: COMPLETE ===================== -->
+  <section class="screen" id="screen-receive-complete">
+    <div class="screen-body screen-body-center">
+      <div class="complete-preview" id="complete-preview"></div>
+      <div class="complete-name" id="complete-name">-</div>
+      <div class="complete-sub" id="complete-sub">-</div>
+      <div class="complete-checks" id="complete-checks">
+        <div class="check-line">✓ 파일 수신 완료</div>
+        <div class="check-line">✓ 무결성 검사 완료 (SHA-256)</div>
+      </div>
+      <button class="big-btn big-btn-primary" id="btn-save-file">파일 저장</button>
+      <button class="big-btn big-btn-secondary" id="btn-receive-again">새 파일 받기</button>
+    </div>
+  </section>
+
+  <!-- ===================== DEBUG PANEL ===================== -->
+  <pre id="debug-panel" hidden></pre>
+
+  <!-- ===================== TOAST ===================== -->
+  <div id="toast" class="toast" hidden></div>
+</div>
+
+<script src="src/vendor/qrcode.js"></script>
+<script src="src/vendor/jsQR.js"></script>
+<script type="module" src="src/main.js"></script>

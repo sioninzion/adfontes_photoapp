@@ -1,0 +1,154 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, viewport-fit=cover" />
+<title>2026 여름수련회 인생네컷</title>
+
+<meta name="description" content="2026 여름수련회 인생네컷 포토부스" />
+<meta name="theme-color" content="#2fb595" />
+
+<!-- iOS 홈 화면 추가용 -->
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+<meta name="apple-mobile-web-app-title" content="인생네컷" />
+<meta name="mobile-web-app-capable" content="yes" />
+<link rel="apple-touch-icon" href="assets/icons/icon-180.png" />
+<link rel="icon" href="assets/icons/icon-192.png" />
+<link rel="manifest" href="manifest.json" />
+
+<link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+
+<!-- ======================= 시작 화면 ======================= -->
+<section id="screen-start" class="screen screen--active">
+  <div class="start-content">
+    <h1 class="event-title">2026 여름수련회<br />인생네컷</h1>
+    <button id="start-button" type="button" class="btn btn-primary btn-huge">촬영 시작</button>
+    <p id="start-status" class="start-status" aria-live="polite"></p>
+  </div>
+  <p class="start-hint">
+    총 6장의 사진을 촬영합니다<br />
+    사진마다 6초의 포즈 시간이 주어집니다
+  </p>
+</section>
+
+<!-- ======================= 카메라 오류 화면 ======================= -->
+<section id="screen-camera-error" class="screen">
+  <div class="error-panel">
+    <p class="error-icon" aria-hidden="true">📷</p>
+    <p id="camera-error-message" class="error-message">카메라를 시작할 수 없습니다.</p>
+    <button id="camera-error-retry-button" type="button" class="btn btn-primary btn-huge">다시 시도</button>
+  </div>
+</section>
+
+<!-- ======================= 촬영 화면 ======================= -->
+<section id="screen-capture" class="screen">
+  <div class="capture-stage">
+    <video id="capture-video" class="camera-video" autoplay playsinline muted></video>
+    <div id="capture-flash" class="capture-flash" aria-hidden="true"></div>
+    <div class="capture-overlay-top">
+      <span id="capture-progress" class="capture-progress"></span>
+    </div>
+    <div class="capture-overlay-center">
+      <span id="capture-countdown" class="capture-countdown"></span>
+    </div>
+  </div>
+  <div id="capture-thumbnails" class="capture-thumbnails">
+    <div class="capture-thumb"></div>
+    <div class="capture-thumb"></div>
+    <div class="capture-thumb"></div>
+    <div class="capture-thumb"></div>
+    <div class="capture-thumb"></div>
+    <div class="capture-thumb"></div>
+  </div>
+  <audio id="shutter-audio" preload="auto">
+    <source src="assets/sounds/shutter.wav" type="audio/wav" />
+  </audio>
+</section>
+
+<!-- ======================= 선택 화면 ======================= -->
+<section id="screen-select" class="screen">
+  <p class="screen-instruction">마음에 드는 사진 4장을 골라주세요</p>
+  <div id="select-grid" class="select-grid">
+    <button class="select-cell" type="button"><div class="thumb-img"></div><div class="thumb-badge"></div></button>
+    <button class="select-cell" type="button"><div class="thumb-img"></div><div class="thumb-badge"></div></button>
+    <button class="select-cell" type="button"><div class="thumb-img"></div><div class="thumb-badge"></div></button>
+    <button class="select-cell" type="button"><div class="thumb-img"></div><div class="thumb-badge"></div></button>
+    <button class="select-cell" type="button"><div class="thumb-img"></div><div class="thumb-badge"></div></button>
+    <button class="select-cell" type="button"><div class="thumb-img"></div><div class="thumb-badge"></div></button>
+  </div>
+  <button id="select-next-button" type="button" class="btn btn-primary btn-huge" disabled>4장을 선택해주세요</button>
+</section>
+
+<!-- ======================= 편집 화면 (프레임 + 필터) ======================= -->
+<section id="screen-edit" class="screen">
+  <div class="edit-layout">
+    <div class="edit-preview-pane">
+      <canvas id="edit-preview-canvas" class="edit-preview-canvas"></canvas>
+    </div>
+    <div class="edit-controls-pane">
+      <div class="option-group">
+        <h2 class="option-group-title">프레임</h2>
+        <div id="edit-frame-list" class="option-list"></div>
+      </div>
+      <div class="option-group">
+        <h2 class="option-group-title">필터</h2>
+        <div id="edit-filter-list" class="option-list"></div>
+      </div>
+      <button id="edit-finish-button" type="button" class="btn btn-primary btn-huge">사진 완성하기</button>
+    </div>
+  </div>
+</section>
+
+<!-- ======================= 업로드(생성/전송) 화면 ======================= -->
+<section id="screen-upload" class="screen">
+  <div id="upload-loading" class="upload-panel">
+    <div class="spinner" aria-hidden="true"></div>
+    <p class="upload-text">사진을 준비하고 있어요...</p>
+    <div class="upload-progress-track">
+      <div id="upload-progress-bar" class="upload-progress-bar"></div>
+    </div>
+  </div>
+  <div id="upload-failed" class="upload-panel hidden">
+    <img id="upload-failed-image" class="upload-failed-image" alt="완성된 인생네컷" />
+    <p id="upload-error-message" class="error-message">업로드에 실패했습니다.</p>
+    <button id="upload-retry-button" type="button" class="btn btn-primary btn-huge">업로드 다시 시도</button>
+  </div>
+</section>
+
+<!-- ======================= 완성 화면 (QR) ======================= -->
+<section id="screen-result" class="screen">
+  <div class="result-layout">
+    <div class="result-photo-pane">
+      <img id="result-final-image" class="result-final-image" alt="완성된 인생네컷" />
+    </div>
+    <div class="result-qr-pane">
+      <div id="result-qr-container" class="result-qr-container"></div>
+      <p class="result-qr-hint">휴대폰 카메라로 QR 코드를 찍어주세요<br />사진이 열리면 저장해주세요</p>
+      <button id="result-qr-retry-button" type="button" class="btn btn-secondary">QR 다시 만들기</button>
+    </div>
+  </div>
+  <button id="result-restart-button" type="button" class="btn btn-primary btn-huge result-restart-button">처음으로</button>
+  <div id="result-idle-banner" class="idle-banner hidden">
+    <span id="result-idle-seconds">10</span>초 후 처음 화면으로 돌아갑니다
+  </div>
+</section>
+
+<div id="global-error-toast" class="toast" role="alert"></div>
+
+<!-- QR 라이브러리: 일반 스크립트로 불러와 전역 window.qrcode 로 노출 (MIT, Kazuhiko Arase) -->
+<script src="js/vendor/qrcode.js"></script>
+<script type="module" src="js/app.js"></script>
+<script>
+  if ("serviceWorker" in navigator) {
+    window.addEventListener("load", () => {
+      navigator.serviceWorker.register("./sw.js").catch(() => {
+        /* PWA 캐시 없이도 앱은 정상 동작한다 */
+      });
+    });
+  }
+</script>
+</body>
+</html>

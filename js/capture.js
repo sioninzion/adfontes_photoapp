@@ -1,0 +1,176 @@
+// ---------------------------------------------------------------------------
+// 6장 자동 촬영 시퀀스. 카운트다운 UI, 플래시, 셔터음, 프레임 캡처(미러 +
+// cover crop + downscale)를 담당한다.
+// ---------------------------------------------------------------------------
+
+import { CONFIG } from "./config.js";
+import { getPhotoSlotAspect } from "./renderer.js";
+import { computeCoverSourceRect, canvasToBlob, wait, nextId } from "./utils.js";
+
+export class CaptureScreen {
+  /**
+   * @param {object} refs
+   * @param {HTMLVideoElement} refs.videoEl
+   * @param {HTMLElement} refs.countdownEl
+   * @param {HTMLElement} refs.progressEl
+   * @param {HTMLElement[]} refs.thumbnailEls - 길이 6
+   * @param {HTMLElement} refs.flashEl
+   * @param {HTMLAudioElement} [refs.shutterAudioEl]
+   */
+  constructor(refs) {
+    this.videoEl = refs.videoEl;
+    this.countdownEl = refs.countdownEl;
+    this.progressEl = refs.progressEl;
+    this.thumbnailEls = refs.thumbnailEls;
+    this.flashEl = refs.flashEl;
+    this.shutterAudioEl = refs.shutterAudioEl || null;
+
+    this.photos = [];
+    this.cancelled = false;
+    this._timer = null;
+
+    // 오프스크린 캡처용 캔버스는 재사용한다
+    this._canvas = document.createElement("canvas");
+    this._ctx = this._canvas.getContext("2d");
+  }
+
+  /** 새 세션을 위해 상태와 썸네일을 초기화한다. 기존 Object URL은 정리한다. */
+  reset() {
+    this.cancel();
+    this._revokeAll();
+    this.photos = [];
+    this.thumbnailEls.forEach((el) => {
+      el.style.backgroundImage = "";
+      el.classList.remove("filled");
+      el.textContent = "";
+    });
+    this.countdownEl.textContent = "";
+    this.progressEl.textContent = "";
+  }
+
+  cancel() {
+    this.cancelled = true;
+    if (this._timer) {
+      clearInterval(this._timer);
+      this._timer = null;
+    }
+  }
+
+  _revokeAll() {
+    this.photos.forEach((p) => p.url && URL.revokeObjectURL(p.url));
+  }
+
+  /** 6장을 순서대로 촬영한다. 도중 취소되면 null을 반환한다. */
+  async run() {
+    this.cancelled = false;
+    this.photos = [];
+
+    for (let i = 0; i < CONFIG.photoCount; i++) {
+      if (this.cancelled) return null;
+      this._renderProgress(i + 1);
+
+      await this._runCountdown();
+      if (this.cancelled) return null;
+
+      const photo = await this._captureFrame(i);
+      this.photos.push(photo);
+      this._renderThumbnail(i, photo);
+      this._triggerFlashAndShutter();
+
+      await wait(CONFIG.captureFreezeMs);
+      if (this.cancelled) return null;
+    }
+
+    this.countdownEl.textContent = "";
+    this.progressEl.textContent = "";
+    return this.photos;
+  }
+
+  _renderProgress(current) {
+    this.progressEl.textContent = `PHOTO ${current} / ${CONFIG.photoCount}`;
+  }
+
+  _runCountdown() {
+    return new Promise((resolve) => {
+      let remaining = CONFIG.countdownSeconds;
+      this._renderCountdownNumber(remaining);
+
+      this._timer = setInterval(() => {
+        remaining -= 1;
+        if (remaining <= 0) {
+          clearInterval(this._timer);
+          this._timer = null;
+          resolve();
+          return;
+        }
+        this._renderCountdownNumber(remaining);
+      }, 1000);
+    });
+  }
+
+  _renderCountdownNumber(n) {
+    this.countdownEl.textContent = String(n);
+    // 재시작 트릭으로 매번 scale/fade 애니메이션을 다시 실행시킨다
+    this.countdownEl.classList.remove("countdown-pop");
+    // eslint-disable-next-line no-unused-expressions
+    void this.countdownEl.offsetWidth;
+    this.countdownEl.classList.add("countdown-pop");
+  }
+
+  async _captureFrame(index) {
+    const video = this.videoEl;
+    const nativeW = video.videoWidth || 1280;
+    const nativeH = video.videoHeight || 720;
+
+    const aspect = getPhotoSlotAspect();
+    const longEdge = CONFIG.captureLongEdge;
+    const outW = aspect >= 1 ? longEdge : Math.round(longEdge * aspect);
+    const outH = aspect >= 1 ? Math.round(longEdge / aspect) : longEdge;
+
+    this._canvas.width = outW;
+    this._canvas.height = outH;
+    const ctx = this._ctx;
+
+    ctx.save();
+    // 전면 카메라 미러링: 미리보기(CSS 반전)와 동일한 방향으로 저장한다
+    ctx.translate(outW, 0);
+    ctx.scale(-1, 1);
+
+    const { sx, sy, sw, sh } = computeCoverSourceRect(nativeW, nativeH, outW, outH);
+    ctx.drawImage(video, sx, sy, sw, sh, 0, 0, outW, outH);
+    ctx.restore();
+
+    const blob = await canvasToBlob(this._canvas, "image/jpeg", CONFIG.captureJpegQuality);
+    const url = URL.createObjectURL(blob);
+
+    return { id: nextId(), index, blob, url, width: outW, height: outH };
+  }
+
+  _renderThumbnail(index, photo) {
+    const el = this.thumbnailEls[index];
+    if (!el) return;
+    el.style.backgroundImage = `url(${photo.url})`;
+    el.classList.add("filled");
+  }
+
+  _triggerFlashAndShutter() {
+    this.flashEl.classList.remove("flash-active");
+    // eslint-disable-next-line no-unused-expressions
+    void this.flashEl.offsetWidth;
+    this.flashEl.classList.add("flash-active");
+
+    if (this.shutterAudioEl) {
+      try {
+        this.shutterAudioEl.currentTime = 0;
+        const playPromise = this.shutterAudioEl.play();
+        if (playPromise && typeof playPromise.catch === "function") {
+          playPromise.catch(() => {
+            /* Safari 자동재생 정책으로 실패해도 촬영에는 영향 없음 */
+          });
+        }
+      } catch {
+        /* 무시 */
+      }
+    }
+  }
+}

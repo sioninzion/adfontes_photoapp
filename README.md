@@ -124,6 +124,7 @@ js/
 view.html                 QR 스캔 시 휴대폰에서 열리는 사진 보기/저장 페이지
 assets/
   frames/                 실제 사용 중인 PNG 프레임 3종(White/Black/Blue)
+  decor/                  화면 장식용 삽화(태양/구름/반짝임 2종/God's kids) - index.html에서 화면별로 배치
   icons/                  PWA 아이콘 (180/192/512/512-maskable)
   sounds/shutter.wav       셔터 효과음
   fonts/                  버튼/제목용 Ok단단체, 본문용 온글잎 의연체 (둘 다 상업용 무료)

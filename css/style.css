@@ -236,6 +236,89 @@ img {
 }
 
 /* -------------------------------------------------------------------------
+   장식 오브젝트 (구름/태양/반짝임/God's kids 삽화)
+   모든 화면에서 동일한 규칙: 0.6초 간격으로 -10deg <-> +10deg 사이를 흔든다.
+   순수 장식이라 pointer-events:none + aria-hidden 처리한다.
+   ------------------------------------------------------------------------- */
+.decor {
+  position: absolute;
+  display: block;
+  pointer-events: none;
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-user-drag: none;
+  animation: decor-wobble 1.2s ease-in-out infinite;
+}
+
+@keyframes decor-wobble {
+  0%, 100% { transform: rotate(-10deg); }
+  50% { transform: rotate(10deg); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .decor {
+    animation: none;
+  }
+}
+
+.decor-sun {
+  width: clamp(64px, 9vw, 120px);
+  height: auto;
+}
+
+.decor-cloud {
+  width: clamp(72px, 10vw, 130px);
+  height: auto;
+}
+
+/* "인생네컷" 제목 한 글자 크기 정도 */
+.decor-particle {
+  width: clamp(32px, 5.5vw, 56px);
+  height: auto;
+}
+
+.decor-godskid {
+  width: clamp(120px, 16vw, 220px);
+  height: auto;
+}
+
+/* 시작 화면 배치: 태양/구름은 위쪽, 파티클은 양옆, God's kids는 왼쪽 아래
+   (바닥/왼쪽 끝에 딱 붙지 않도록 여유를 둔다) */
+.decor-start-sun { top: 4%; left: 6%; }
+.decor-start-cloud { top: 5%; right: 7%; }
+.decor-start-godskid { bottom: 14%; left: 13%; }
+
+.decor-start-particle-1 { top: 16%; left: 3%; }
+.decor-start-particle-2 { top: 42%; left: 2%; }
+.decor-start-particle-3 { top: 70%; left: 4.5%; }
+.decor-start-particle-4 { top: 18%; right: 3%; }
+.decor-start-particle-5 { top: 46%; right: 2%; }
+.decor-start-particle-6 { top: 74%; right: 4.5%; }
+
+/* 촬영/선택 화면: 더 작게, 가로 모드에서만 태양/구름 표시, 파티클은 항상 여백에 */
+.decor-sun--compact { width: clamp(36px, 4.5vw, 64px); height: auto; }
+.decor-cloud--compact { width: clamp(40px, 5vw, 72px); height: auto; }
+
+.decor-capsel-sun { top: 4px; left: 4px; }
+.decor-capsel-cloud { top: 4px; right: 4px; }
+.decor-capsel-particle-left { top: 45%; left: 2px; }
+.decor-capsel-particle-right { top: 55%; right: 2px; }
+
+@media (orientation: portrait) {
+  .decor-capsel-sun,
+  .decor-capsel-cloud {
+    display: none;
+  }
+}
+
+/* 편집 화면: "사진 완성하기" 버튼 바로 위, 일반 문서 흐름으로 배치 */
+.decor-inline {
+  position: static;
+  display: block;
+  margin: 0 auto 4px;
+}
+
+/* -------------------------------------------------------------------------
    카메라 오류 화면
    ------------------------------------------------------------------------- */
 .error-panel {
@@ -560,7 +643,13 @@ img {
 .edit-controls-pane .btn-huge {
   width: 100%;
   min-width: 0;
+}
+
+/* 프레임 옵션과의 사이 공간을 이 이미지가 흡수해서, God's kids 삽화가 버튼
+   바로 위(조금 떨어진 채)에 함께 붙어있도록 한다. */
+.edit-controls-pane .decor-inline {
   margin-top: auto;
+  margin-bottom: 10px;
 }
 
 /* -------------------------------------------------------------------------

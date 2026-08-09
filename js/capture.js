@@ -40,6 +40,17 @@ export class CaptureScreen {
     this._onViewportChange = () => requestAnimationFrame(() => this._fitVideoBox());
     window.addEventListener("resize", this._onViewportChange);
     window.addEventListener("orientationchange", this._onViewportChange);
+
+    // resize/orientationchange 이벤트만으로는 iOS Safari에서 레이아웃 변경
+    // 시점을 놓치는 경우가 있어, 실제 컨테이너 크기 변화를 직접 관찰한다.
+    if (typeof ResizeObserver !== "undefined" && this.stageEl) {
+      this._resizeObserver = new ResizeObserver(() => this._fitVideoBox());
+      this._resizeObserver.observe(this.stageEl);
+    }
+
+    // 카메라 스트림 메타데이터가 늦게 반영되는 기기에서도 최종적으로
+    // 한 번 더 정확한 크기를 맞춘다.
+    this.videoEl.addEventListener("loadedmetadata", () => this._fitVideoBox());
   }
 
   /** .capture-stage 안에서 captureAspectRatio를 유지하는 최대 크기를 계산해 적용한다. */

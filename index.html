@@ -144,9 +144,31 @@
 <script>
   if ("serviceWorker" in navigator) {
     window.addEventListener("load", () => {
-      navigator.serviceWorker.register("./sw.js").catch(() => {
-        /* PWA 캐시 없이도 앱은 정상 동작한다 */
-      });
+      // updateViaCache:"none" - sw.js 파일 자체가 브라우저 HTTP 캐시에 걸려
+      // 새 버전을 못 받아오는 것을 막는다. 매 방문마다 sw.js 변경 여부를 확인한다.
+      navigator.serviceWorker
+        .register("./sw.js", { updateViaCache: "none" })
+        .then((reg) => reg.update().catch(() => {}))
+        .catch(() => {
+          /* PWA 캐시 없이도 앱은 정상 동작한다 */
+        });
+    });
+
+    // 새 서비스워커가 "업데이트"로 활성화된 경우에만 화면을 한 번 새로고침해서
+    // 최신 코드를 즉시 반영한다. 최초 설치 시의 claim()도 controllerchange를
+    // 발생시키므로, 그 경우(이전 controller가 없었던 경우)에는 새로고침하지
+    // 않도록 구분한다 - 그렇지 않으면 첫 방문(카메라 시작 등) 도중에도
+    // 페이지가 갑자기 새로고침되어 버린다.
+    let hasReloadedForUpdate = false;
+    let hadController = !!navigator.serviceWorker.controller;
+    navigator.serviceWorker.addEventListener("controllerchange", () => {
+      if (!hadController) {
+        hadController = true;
+        return;
+      }
+      if (hasReloadedForUpdate) return;
+      hasReloadedForUpdate = true;
+      window.location.reload();
     });
   }
 </script>

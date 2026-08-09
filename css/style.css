@@ -159,8 +159,6 @@ img {
    ------------------------------------------------------------------------- */
 #screen-start {
   gap: 48px;
-  padding-left: 16%;
-  padding-right: 16%;
 }
 
 .start-content {
@@ -214,91 +212,6 @@ img {
 @media (prefers-reduced-motion: reduce) {
   .event-title-line {
     animation: none;
-  }
-}
-
-/* -------------------------------------------------------------------------
-   시작 화면 양옆 성경 말씀 띠 (순수 장식)
-   ------------------------------------------------------------------------- */
-.verse-rail {
-  position: absolute;
-  top: 0;
-  bottom: 0;
-  width: 15%;
-  overflow: hidden;
-  pointer-events: none;
-  display: flex;
-  flex-direction: row;
-  gap: 8px;
-  -webkit-mask-image: linear-gradient(to bottom, transparent, #000 12%, #000 88%, transparent);
-  mask-image: linear-gradient(to bottom, transparent, #000 12%, #000 88%, transparent);
-}
-
-/* 가장 안쪽(중앙과 가까운 쪽) 띠를 기준으로 나머지 띠들을 안쪽으로 당겨
-   모은다 - 가장 바깥쪽 띠가 화면 맨 끝에 딱 붙지 않도록 한다. */
-.verse-rail--left {
-  left: 0;
-  justify-content: flex-end;
-}
-
-.verse-rail--right {
-  right: 0;
-  justify-content: flex-start;
-}
-
-/* 한 옆면에 5개씩, 각자 다른 속도로 흐르는 가는 띠. 띠 사이 간격(gap)과
-   고정 너비로 서로 뭉쳐 보이지 않고 또렷이 구분되게 한다. */
-.verse-ribbon {
-  position: relative;
-  flex: 0 0 clamp(18px, 1.9vw, 26px);
-  height: 100%;
-  overflow: hidden;
-}
-
-.verse-ribbon-text {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  white-space: nowrap;
-  font-size: 0.75rem;
-  line-height: 18px;
-  color: var(--color-primary-dark);
-  opacity: 0.6;
-}
-
-/* JS(Web Animations API)가 붙기 전까지 보일 기본 모습(자바스크립트가 실제
-   스크롤 애니메이션을 담당하며, 항상 "중앙정렬 -> 스크롤 -> 회전" 순서를
-   그대로 유지해야 화면상 이동이 순수한 수직 이동이 된다) */
-.verse-text--rotate-ccw {
-  transform: translate(-50%, -50%) rotate(-90deg);
-}
-
-.verse-text--rotate-cw {
-  transform: translate(-50%, -50%) rotate(90deg);
-}
-
-.verse-font-a {
-  font-family: var(--font-heading);
-}
-
-.verse-font-b {
-  font-family: var(--font-body);
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .verse-ribbon-text {
-    animation-play-state: paused !important;
-  }
-}
-
-@media (max-width: 900px) {
-  .verse-rail {
-    display: none;
-  }
-
-  #screen-start {
-    padding-left: calc(24px + var(--safe-left));
-    padding-right: calc(24px + var(--safe-right));
   }
 }
 
@@ -778,11 +691,57 @@ img {
   font-weight: 700;
 }
 
+.result-actions-row {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  gap: 28px;
+  flex-wrap: wrap;
+}
+
 .result-restart-button {
   flex-shrink: 0;
 }
 
+.result-drive-save-wrap {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.drive-save-bubble {
+  position: relative;
+  display: inline-block;
+  margin-bottom: 16px;
+  padding: 8px 18px;
+  background: var(--color-surface);
+  color: var(--color-primary-dark);
+  border: 2px solid var(--color-primary);
+  border-radius: 999px;
+  font-family: var(--font-heading);
+  font-size: 0.9rem;
+  font-weight: 700;
+  white-space: nowrap;
+  box-shadow: 0 4px 10px rgba(18, 58, 107, 0.12);
+}
+
+.drive-save-bubble::after {
+  content: "";
+  position: absolute;
+  bottom: -8px;
+  left: 50%;
+  width: 14px;
+  height: 14px;
+  background: var(--color-surface);
+  border-right: 2px solid var(--color-primary);
+  border-bottom: 2px solid var(--color-primary);
+  transform: translateX(-50%) rotate(45deg);
+}
+
 .result-drive-save-button {
+  flex-shrink: 0;
   transition: color 0.15s ease, border-color 0.15s ease, background-color 0.15s ease;
 }
 

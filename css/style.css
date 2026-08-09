@@ -312,9 +312,10 @@ img {
 .decor-start-particle-5 { top: 44%; right: 0.5%; }
 .decor-start-particle-6 { top: 74%; right: 4.5%; }
 
-/* 촬영/선택 화면: 더 작게, 가로 모드에서만 태양/구름 표시, 파티클은 항상 여백에 */
-.decor-sun--compact { width: clamp(61px, 7.7vw, 108px); height: auto; }
-.decor-cloud--compact { width: clamp(58px, 7.2vw, 103px); height: auto; }
+/* 촬영/선택 화면: 더 작게, 가로 모드에서만 태양/구름 표시, 파티클은 항상 여백에
+   (시작 화면과 동일하게 태양 +30%, 구름 +20%를 두 번 누적 적용한 크기) */
+.decor-sun--compact { width: clamp(103px, 13vw, 183px); height: auto; }
+.decor-cloud--compact { width: clamp(84px, 10.4vw, 148px); height: auto; }
 
 .decor-capsel-sun { top: 4px; left: 4px; }
 .decor-capsel-cloud { top: 4px; right: 4px; }

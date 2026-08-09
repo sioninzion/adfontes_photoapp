@@ -141,7 +141,7 @@ function buildEditorButtons() {
     btn.className = "option-btn frame-btn";
     btn.dataset.frameId = frame.id;
     btn.innerHTML = `
-      <span class="frame-swatch" style="background:${frame.background};border-color:${frame.accentColor}"></span>
+      <span class="frame-swatch" style="background-image:url(${frame.overlaySrc})"></span>
       <span class="option-label">${frame.name}</span>
     `;
     editFrameList.appendChild(btn);

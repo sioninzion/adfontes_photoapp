@@ -493,7 +493,7 @@ img {
   background: var(--color-surface);
   font-family: var(--font-heading);
   cursor: pointer;
-  min-height: 92px;
+  min-height: 160px;
   justify-content: center;
 }
 
@@ -509,10 +509,13 @@ img {
 }
 
 .frame-swatch {
-  width: 40px;
-  height: 40px;
-  border-radius: 10px;
-  border: 2px solid var(--color-border);
+  width: 72px;
+  height: 120px;
+  border-radius: 8px;
+  border: 1px solid var(--color-border);
+  background-color: #f4f4f4;
+  background-size: cover;
+  background-position: center;
   display: block;
 }
 

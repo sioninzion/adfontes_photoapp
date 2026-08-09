@@ -1,69 +1,16 @@
 // ---------------------------------------------------------------------------
 // 인생네컷 합성의 유일한 진실 소스(single source of truth).
-// - 레이아웃(사진 슬롯 위치/크기)을 비율 기반으로 계산해서
-//   미리보기 Canvas(작은 크기)와 최종 Canvas(1200x3600)가 항상 동일한 비율로
-//   렌더링되도록 한다.
-// - 촬영 비율(CONFIG.captureAspectRatio)은 이 인쇄 레이아웃과는 별개로
-//   관리된다(capture.js). 촬영된 사진은 여기서 각 슬롯 모양에 맞춰
-//   다시 한번 cover crop 되므로 찌그러짐 없이 항상 잘 맞는다.
+// - FRAMES(config.js)의 각 프레임은 실제 디자인된 PNG(2x2 그리드, 사진이
+//   들어갈 4개의 투명 구멍 + 로고/문구가 이미 그려져 있음)이다.
+// - 각 프레임의 windows 좌표는 PNG 원본 픽셀 기준이므로, 요청받은 출력
+//   width/height에 맞춰 비율대로 확대/축소해서 사용한다. 이 스케일 계산을
+//   미리보기 Canvas(작은 크기)와 최종 Canvas가 동일하게 공유하므로 항상
+//   같은 구도로 보인다.
 // ---------------------------------------------------------------------------
 
-import { CONFIG } from "./config.js";
 import { drawImageCover } from "./utils.js";
 
-const LAYOUT_RATIOS = {
-  marginX: 0.05,
-  marginTop: 0.02,
-  marginBottom: 0.01,
-  gap: 0.012,
-  footerHeight: 0.09
-};
-
 const overlayImageCache = new Map();
-
-/** width/height 어떤 값이 오든 동일한 비율의 레이아웃을 계산한다. */
-export function computeLayout(width, height) {
-  const marginX = width * LAYOUT_RATIOS.marginX;
-  const marginTop = height * LAYOUT_RATIOS.marginTop;
-  const marginBottom = height * LAYOUT_RATIOS.marginBottom;
-  const gap = height * LAYOUT_RATIOS.gap;
-  const footerHeight = height * LAYOUT_RATIOS.footerHeight;
-
-  const slotWidth = width - marginX * 2;
-  const slotsAreaHeight = height - marginTop - marginBottom - footerHeight - gap * (CONFIG.selectedPhotoCount - 1);
-  const slotHeight = slotsAreaHeight / CONFIG.selectedPhotoCount;
-
-  const slots = [];
-  for (let i = 0; i < CONFIG.selectedPhotoCount; i++) {
-    slots.push({
-      x: marginX,
-      y: marginTop + i * (slotHeight + gap),
-      w: slotWidth,
-      h: slotHeight
-    });
-  }
-
-  return {
-    marginX,
-    marginTop,
-    marginBottom,
-    gap,
-    footerHeight,
-    footerY: height - footerHeight - marginBottom,
-    slots
-  };
-}
-
-function roundRectPath(ctx, x, y, w, h, r) {
-  const radius = Math.min(r, w / 2, h / 2);
-  ctx.beginPath();
-  ctx.moveTo(x + radius, y);
-  ctx.arcTo(x + w, y, x + w, y + h, radius);
-  ctx.arcTo(x + w, y + h, x, y + h, radius);
-  ctx.arcTo(x, y + h, x, y, radius);
-  ctx.arcTo(x, y, x + w, y, radius);
-  ctx.closePath();
-}
 
 function loadOverlayImage(src) {
   if (overlayImageCache.has(src)) return overlayImageCache.get(src);
@@ -83,78 +30,41 @@ function loadOverlayImage(src) {
  * @param {object} options
  * @param {number} options.width
  * @param {number} options.height
- * @param {Array<HTMLImageElement|HTMLCanvasElement|null>} options.images - 길이 4, 위->아래 순서
- * @param {object} options.frame - FRAMES 항목
+ * @param {Array<HTMLImageElement|HTMLCanvasElement|null>} options.images - 길이 4
+ *   (0:왼쪽위 1:오른쪽위 2:왼쪽아래 3:오른쪽아래 순서, 선택한 순서와 동일)
+ * @param {object} options.frame - FRAMES 항목 (overlaySrc/overlayWidth/overlayHeight/windows)
  */
 export async function renderComposite(ctx, { width, height, images, frame }) {
-  const layout = computeLayout(width, height);
-  const cornerRadius = width * 0.012;
-
   ctx.save();
   ctx.clearRect(0, 0, width, height);
-
-  // 배경
-  ctx.fillStyle = frame.background;
+  ctx.fillStyle = "#ffffff";
   ctx.fillRect(0, 0, width, height);
 
-  // 사진
-  for (let i = 0; i < CONFIG.selectedPhotoCount; i++) {
-    const slot = layout.slots[i];
-    const image = images[i];
+  const scaleX = width / frame.overlayWidth;
+  const scaleY = height / frame.overlayHeight;
 
-    ctx.save();
-    roundRectPath(ctx, slot.x, slot.y, slot.w, slot.h, cornerRadius);
-    ctx.clip();
+  frame.windows.forEach((win, i) => {
+    const image = images[i];
+    const dx = win.x * scaleX;
+    const dy = win.y * scaleY;
+    const dw = win.w * scaleX;
+    const dh = win.h * scaleY;
 
     if (image) {
       const srcW = image.naturalWidth || image.width;
       const srcH = image.naturalHeight || image.height;
-      drawImageCover(ctx, image, srcW, srcH, slot.x, slot.y, slot.w, slot.h);
+      drawImageCover(ctx, image, srcW, srcH, dx, dy, dw, dh);
     } else {
       ctx.fillStyle = "#d9d9d9";
-      ctx.fillRect(slot.x, slot.y, slot.w, slot.h);
+      ctx.fillRect(dx, dy, dw, dh);
     }
-    ctx.restore();
+  });
 
-    // 슬롯 테두리
-    ctx.save();
-    roundRectPath(ctx, slot.x, slot.y, slot.w, slot.h, cornerRadius);
-    ctx.lineWidth = Math.max(1, width * 0.003);
-    ctx.strokeStyle = frame.accentColor;
-    ctx.stroke();
-    ctx.restore();
-  }
-
-  // PNG 오버레이 프레임 (선택 사항, 추후 확장용)
-  let overlayApplied = false;
-  if (frame.overlaySrc) {
-    try {
-      const overlayImg = await loadOverlayImage(frame.overlaySrc);
-      ctx.drawImage(overlayImg, 0, 0, width, height);
-      overlayApplied = true;
-    } catch {
-      overlayApplied = false; // 오버레이 로드 실패 시 기본 하단 텍스트로 대체
-    }
-  }
-
-  if (!overlayApplied) {
-    // 커스텀 폰트가 아직 로드되지 않았으면 Canvas 텍스트는 조용히 기본 폰트로
-    // 그려져 버리므로(에러 없이 무시됨), 그리기 전에 로딩이 끝나길 기다린다.
-    if (document.fonts && document.fonts.ready) {
-      await document.fonts.ready;
-    }
-
-    ctx.fillStyle = frame.textColor;
-    ctx.textAlign = "center";
-    ctx.textBaseline = "middle";
-
-    const footerCenterY = layout.footerY + layout.footerHeight * 0.42;
-    ctx.font = `700 ${Math.round(height * 0.024)}px "OkDanDan", "Pretendard", "Apple SD Gothic Neo", sans-serif`;
-    ctx.fillText(CONFIG.event.footer, width / 2, footerCenterY);
-
-    ctx.font = `400 ${Math.round(height * 0.015)}px "OngeulipUiyeon", "Pretendard", "Apple SD Gothic Neo", sans-serif`;
-    ctx.fillStyle = frame.accentColor;
-    ctx.fillText(CONFIG.event.subFooter, width / 2, footerCenterY + height * 0.03);
+  try {
+    const overlayImg = await loadOverlayImage(frame.overlaySrc);
+    ctx.drawImage(overlayImg, 0, 0, width, height);
+  } catch {
+    // 프레임 이미지 로드에 실패해도 사진은 그대로 보여준다 (흰 화면으로 멈추지 않음)
   }
 
   ctx.restore();

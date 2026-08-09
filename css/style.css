@@ -159,6 +159,8 @@ img {
    ------------------------------------------------------------------------- */
 #screen-start {
   gap: 48px;
+  padding-left: 16%;
+  padding-right: 16%;
 }
 
 .start-content {
@@ -183,6 +185,7 @@ img {
 
 .event-title-line {
   display: inline-block;
+  text-shadow: 0 8px 16px rgba(18, 58, 107, 0.28);
   animation: title-float 3.6s ease-in-out infinite;
 }
 
@@ -191,12 +194,10 @@ img {
 }
 
 .event-title-line--brand {
-  background: var(--color-accent);
-  color: var(--color-primary-dark);
-  font-size: clamp(0.85rem, 1.8vw, 1.25rem);
+  color: #ffffff;
+  font-size: clamp(2rem, 4.6vw, 3.6rem);
   letter-spacing: 0.14em;
-  padding: 6px 22px;
-  border-radius: 999px;
+  text-shadow: 0 8px 16px rgba(18, 58, 107, 0.28), 0 0 18px rgba(63, 197, 255, 0.7);
   animation-delay: 0.4s;
 }
 
@@ -213,6 +214,112 @@ img {
 @media (prefers-reduced-motion: reduce) {
   .event-title-line {
     animation: none;
+  }
+}
+
+/* -------------------------------------------------------------------------
+   시작 화면 양옆 성경 말씀 띠 (순수 장식)
+   ------------------------------------------------------------------------- */
+.verse-rail {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 15%;
+  overflow: hidden;
+  pointer-events: none;
+  -webkit-mask-image: linear-gradient(to bottom, transparent, #000 12%, #000 88%, transparent);
+  mask-image: linear-gradient(to bottom, transparent, #000 12%, #000 88%, transparent);
+}
+
+.verse-rail--left {
+  left: 0;
+}
+
+.verse-rail--right {
+  right: 0;
+}
+
+.verse-track {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.verse-rail--left .verse-track {
+  animation: verse-scroll-up 110s linear infinite;
+}
+
+.verse-rail--right .verse-track {
+  animation: verse-scroll-down 110s linear infinite;
+}
+
+.verse-slot {
+  position: relative;
+  width: 100%;
+  height: 170px;
+  flex-shrink: 0;
+}
+
+.verse-text {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 150px;
+  text-align: center;
+  font-size: 0.82rem;
+  line-height: 1.5;
+  color: var(--color-primary-dark);
+  opacity: 0.55;
+}
+
+.verse-text--rotate-ccw {
+  transform: translate(-50%, -50%) rotate(-90deg);
+}
+
+.verse-text--rotate-cw {
+  transform: translate(-50%, -50%) rotate(90deg);
+}
+
+.verse-font-a {
+  font-family: var(--font-heading);
+}
+
+.verse-font-b {
+  font-family: var(--font-body);
+}
+
+.verse-ref {
+  display: inline-block;
+  margin-top: 4px;
+  font-size: 0.72em;
+  opacity: 0.8;
+}
+
+@keyframes verse-scroll-up {
+  0% { transform: translateY(0); }
+  100% { transform: translateY(-50%); }
+}
+
+@keyframes verse-scroll-down {
+  0% { transform: translateY(-50%); }
+  100% { transform: translateY(0); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .verse-rail--left .verse-track,
+  .verse-rail--right .verse-track {
+    animation: none;
+  }
+}
+
+@media (max-width: 900px) {
+  .verse-rail {
+    display: none;
+  }
+
+  #screen-start {
+    padding-left: calc(24px + var(--safe-left));
+    padding-right: calc(24px + var(--safe-right));
   }
 }
 

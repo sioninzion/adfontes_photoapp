@@ -112,14 +112,18 @@ js/
   renderer.js             최종 합성 로직 (미리보기/최종 출력이 공유하는 단일 진실 소스)
   cloudinary.js           Unsigned Upload
   qr.js                   QR 코드 렌더링 (vendor 라이브러리 wrapper)
+  verseRail.js            시작 화면 양옆에 흐르는 성경 말씀 띠 (순수 장식)
   app.js                  화면 전환/상태 관리, 에러 처리, 자동 초기화 타이머
   vendor/qrcode.js        QR 생성 라이브러리 (MIT, Kazuhiko Arase, 서드파티 코드 그대로 포함)
+view.html                 QR 스캔 시 휴대폰에서 열리는 사진 보기/저장 페이지
 assets/
-  frames/                 PNG 프레임을 추가할 폴더 (현재 비어 있음)
+  frames/                 실제 사용 중인 PNG 프레임 3종(White/Black/Blue)
   icons/                  PWA 아이콘 (180/192/512/512-maskable)
   sounds/shutter.wav       셔터 효과음
   fonts/                  버튼/제목용 Ok단단체, 본문용 온글잎 의연체 (둘 다 상업용 무료)
 ```
+
+성경 말씀 목록은 `js/config.js`의 `BIBLE_VERSES` 배열 하나로 관리됩니다. 항목을 추가/삭제/수정하면 시작 화면 양옆 띠에 바로 반영됩니다.
 
 ### 폰트
 

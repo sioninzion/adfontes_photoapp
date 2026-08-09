@@ -12,6 +12,7 @@ import { renderComposite } from "./renderer.js";
 import { uploadToCloudinary } from "./cloudinary.js";
 import { renderQrCode } from "./qr.js";
 import { canvasToBlob } from "./utils.js";
+import { initVerseRails } from "./verseRail.js";
 
 // ---------------------------------------------------------------------------
 // DOM 참조
@@ -433,5 +434,7 @@ if (typeof FontFace !== "undefined") {
       /* 로딩 실패해도 CSS @font-face의 시스템 폰트 fallback으로 정상 동작한다 */
     });
 }
+
+initVerseRails();
 
 showScreen("start");

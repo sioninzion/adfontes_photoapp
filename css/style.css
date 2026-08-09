@@ -216,10 +216,14 @@ img {
 }
 
 .camera-video {
-  width: auto;
-  height: 100%;
+  /* 정확한 width/height는 capture.js가 CONFIG.captureAspectRatio 기준으로
+     매번 JS에서 픽셀 단위로 계산해 강제한다 (세로/가로 회전에도 항상 동일
+     비율을 보장하기 위함 - CSS aspect-ratio만으로는 브라우저마다 flex 자식
+     크기 계산이 달라질 수 있어 신뢰하지 않는다). 아래 값은 계산 전 잠깐
+     보일 수 있는 기본값이다.
+  */
   max-width: 100%;
-  aspect-ratio: var(--capture-aspect);
+  max-height: 100%;
   object-fit: cover;
   background: #111;
   border-radius: 20px;

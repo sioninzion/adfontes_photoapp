@@ -8,7 +8,7 @@ import { CameraManager } from "./camera.js";
 import { CaptureScreen } from "./capture.js";
 import { SelectionScreen } from "./selection.js";
 import { EditorScreen } from "./editor.js";
-import { renderComposite, getPhotoSlotAspect } from "./renderer.js";
+import { renderComposite } from "./renderer.js";
 import { uploadToCloudinary } from "./cloudinary.js";
 import { renderQrCode } from "./qr.js";
 import { canvasToBlob } from "./utils.js";
@@ -32,6 +32,7 @@ const startStatus = document.getElementById("start-status");
 const cameraErrorMessage = document.getElementById("camera-error-message");
 const cameraErrorRetryButton = document.getElementById("camera-error-retry-button");
 
+const captureStage = document.getElementById("capture-stage");
 const captureVideo = document.getElementById("capture-video");
 const captureProgress = document.getElementById("capture-progress");
 const captureCountdown = document.getElementById("capture-countdown");
@@ -88,6 +89,7 @@ cameraManager.onError = (err) => {
 };
 
 const captureScreen = new CaptureScreen({
+  stageEl: captureStage,
   videoEl: captureVideo,
   countdownEl: captureCountdown,
   progressEl: captureProgress,
@@ -420,7 +422,8 @@ window.addEventListener("offline", () => {
 // ---------------------------------------------------------------------------
 // 초기 화면
 // ---------------------------------------------------------------------------
-// 카메라 미리보기(CSS)와 실제 촬영 crop이 항상 같은 비율을 쓰도록 동기화한다.
-document.documentElement.style.setProperty("--capture-aspect", String(getPhotoSlotAspect()));
+// 썸네일 그리드(CSS aspect-ratio)가 실제 촬영 비율과 항상 같도록 동기화한다.
+// (촬영 중인 비디오 박스 자체는 CaptureScreen이 JS로 직접 크기를 계산해 강제한다)
+document.documentElement.style.setProperty("--capture-aspect", String(CONFIG.captureAspectRatio));
 
 showScreen("start");

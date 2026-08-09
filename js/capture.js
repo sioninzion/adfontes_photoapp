@@ -4,12 +4,12 @@
 // ---------------------------------------------------------------------------
 
 import { CONFIG } from "./config.js";
-import { getPhotoSlotAspect } from "./renderer.js";
 import { computeCoverSourceRect, canvasToBlob, wait, nextId } from "./utils.js";
 
 export class CaptureScreen {
   /**
    * @param {object} refs
+   * @param {HTMLElement} refs.stageEl - 비디오를 담는 컨테이너(.capture-stage)
    * @param {HTMLVideoElement} refs.videoEl
    * @param {HTMLElement} refs.countdownEl
    * @param {HTMLElement} refs.progressEl
@@ -18,6 +18,7 @@ export class CaptureScreen {
    * @param {HTMLAudioElement} [refs.shutterAudioEl]
    */
   constructor(refs) {
+    this.stageEl = refs.stageEl;
     this.videoEl = refs.videoEl;
     this.countdownEl = refs.countdownEl;
     this.progressEl = refs.progressEl;
@@ -32,6 +33,32 @@ export class CaptureScreen {
     // 오프스크린 캡처용 캔버스는 재사용한다
     this._canvas = document.createElement("canvas");
     this._ctx = this._canvas.getContext("2d");
+
+    // 아이패드를 세로/가로 어느 쪽으로 들어도 미리보기와 촬영 결과가 항상
+    // 동일한 CONFIG.captureAspectRatio 비율을 갖도록, CSS의 aspect-ratio에
+    // 기대지 않고 실제 픽셀 크기를 JS로 직접 계산해서 강제한다.
+    this._onViewportChange = () => requestAnimationFrame(() => this._fitVideoBox());
+    window.addEventListener("resize", this._onViewportChange);
+    window.addEventListener("orientationchange", this._onViewportChange);
+  }
+
+  /** .capture-stage 안에서 captureAspectRatio를 유지하는 최대 크기를 계산해 적용한다. */
+  _fitVideoBox() {
+    if (!this.stageEl) return;
+    const cw = this.stageEl.clientWidth;
+    const ch = this.stageEl.clientHeight;
+    if (!cw || !ch) return;
+
+    const ratio = CONFIG.captureAspectRatio;
+    let w = cw;
+    let h = w / ratio;
+    if (h > ch) {
+      h = ch;
+      w = h * ratio;
+    }
+
+    this.videoEl.style.width = `${Math.round(w)}px`;
+    this.videoEl.style.height = `${Math.round(h)}px`;
   }
 
   /** 새 세션을 위해 상태와 썸네일을 초기화한다. 기존 Object URL은 정리한다. */
@@ -64,6 +91,7 @@ export class CaptureScreen {
   async run() {
     this.cancelled = false;
     this.photos = [];
+    this._fitVideoBox();
 
     for (let i = 0; i < CONFIG.photoCount; i++) {
       if (this.cancelled) return null;
@@ -122,7 +150,7 @@ export class CaptureScreen {
     const nativeW = video.videoWidth || 1280;
     const nativeH = video.videoHeight || 720;
 
-    const aspect = getPhotoSlotAspect();
+    const aspect = CONFIG.captureAspectRatio;
     const longEdge = CONFIG.captureLongEdge;
     const outW = aspect >= 1 ? longEdge : Math.round(longEdge * aspect);
     const outH = aspect >= 1 ? Math.round(longEdge / aspect) : longEdge;

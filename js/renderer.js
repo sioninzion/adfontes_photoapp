@@ -3,8 +3,9 @@
 // - 레이아웃(사진 슬롯 위치/크기)을 비율 기반으로 계산해서
 //   미리보기 Canvas(작은 크기)와 최종 Canvas(1200x3600)가 항상 동일한 비율로
 //   렌더링되도록 한다.
-// - 촬영 화면의 카메라 미리보기도 이 슬롯 비율(getPhotoSlotAspect)을 그대로
-//   사용해서, 사용자가 본 구도와 최종 사진 구도가 어긋나지 않게 한다.
+// - 촬영 비율(CONFIG.captureAspectRatio)은 이 인쇄 레이아웃과는 별개로
+//   관리된다(capture.js). 촬영된 사진은 여기서 각 슬롯 모양에 맞춰
+//   다시 한번 cover crop 되므로 찌그러짐 없이 항상 잘 맞는다.
 // ---------------------------------------------------------------------------
 
 import { CONFIG } from "./config.js";
@@ -51,13 +52,6 @@ export function computeLayout(width, height) {
     footerY: height - footerHeight - marginBottom,
     slots
   };
-}
-
-/** 사진 한 칸의 가로/세로 비율. 카메라 미리보기 crop 비율과 공유한다. */
-export function getPhotoSlotAspect() {
-  const layout = computeLayout(CONFIG.finalWidth, CONFIG.finalHeight);
-  const slot = layout.slots[0];
-  return slot.w / slot.h;
 }
 
 function roundRectPath(ctx, x, y, w, h, r) {

@@ -45,16 +45,27 @@
     color: #ffffff;
     font-size: clamp(2rem, 9vw, 3rem);
     letter-spacing: 0.12em;
-    margin: 0 0 20px;
+    margin: 0 0 6px;
     text-shadow: 0 8px 16px rgba(18, 58, 107, 0.28), 0 0 18px rgba(63, 197, 255, 0.7);
     animation: title-float 3.6s ease-in-out infinite;
+  }
+  .subtitle {
+    font-family: "OkDanDan", "Pretendard", "Apple SD Gothic Neo", sans-serif;
+    font-weight: 700;
+    color: #0080e6;
+    font-size: clamp(1rem, 4.2vw, 1.4rem);
+    letter-spacing: 0.06em;
+    margin: 0 0 20px;
+    text-shadow: 0 4px 10px rgba(18, 58, 107, 0.28);
+    animation: title-float 3.6s ease-in-out infinite;
+    animation-delay: 0.4s;
   }
   @keyframes title-float {
     0%, 100% { transform: translateY(0); }
     50% { transform: translateY(-10px); }
   }
   @media (prefers-reduced-motion: reduce) {
-    h1 { animation: none; }
+    h1, .subtitle { animation: none; }
   }
   .photo-card {
     width: 100%;
@@ -123,6 +134,7 @@
 
 <div id="wrap" class="wrap">
   <h1>AD FONTES</h1>
+  <p class="subtitle">근원으로 돌아가라</p>
   <div class="photo-card">
     <img id="photo" alt="인생네컷 사진" />
   </div>

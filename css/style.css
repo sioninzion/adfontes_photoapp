@@ -229,22 +229,28 @@ img {
   pointer-events: none;
   display: flex;
   flex-direction: row;
+  gap: 8px;
   -webkit-mask-image: linear-gradient(to bottom, transparent, #000 12%, #000 88%, transparent);
   mask-image: linear-gradient(to bottom, transparent, #000 12%, #000 88%, transparent);
 }
 
+/* 가장 안쪽(중앙과 가까운 쪽) 띠를 기준으로 나머지 띠들을 안쪽으로 당겨
+   모은다 - 가장 바깥쪽 띠가 화면 맨 끝에 딱 붙지 않도록 한다. */
 .verse-rail--left {
   left: 0;
+  justify-content: flex-end;
 }
 
 .verse-rail--right {
   right: 0;
+  justify-content: flex-start;
 }
 
-/* 한 옆면에 5개씩, 각자 다른 속도로 흐르는 가는 띠 */
+/* 한 옆면에 5개씩, 각자 다른 속도로 흐르는 가는 띠. 띠 사이 간격(gap)과
+   고정 너비로 서로 뭉쳐 보이지 않고 또렷이 구분되게 한다. */
 .verse-ribbon {
   position: relative;
-  flex: 1 1 0;
+  flex: 0 0 clamp(18px, 1.9vw, 26px);
   height: 100%;
   overflow: hidden;
 }
@@ -254,10 +260,10 @@ img {
   top: 50%;
   left: 50%;
   white-space: nowrap;
-  font-size: 0.72rem;
+  font-size: 0.75rem;
   line-height: 18px;
   color: var(--color-primary-dark);
-  opacity: 0.55;
+  opacity: 0.6;
 }
 
 /* JS(Web Animations API)가 붙기 전까지 보일 기본 모습(자바스크립트가 실제
@@ -774,6 +780,22 @@ img {
 
 .result-restart-button {
   flex-shrink: 0;
+}
+
+.result-drive-save-button {
+  transition: color 0.15s ease, border-color 0.15s ease, background-color 0.15s ease;
+}
+
+.result-drive-save-button.is-success {
+  color: #147a3d;
+  border-color: #147a3d;
+  background: #eafbf1;
+}
+
+.result-drive-save-button.is-error {
+  color: var(--color-danger);
+  border-color: var(--color-danger);
+  background: #fdecec;
 }
 
 .idle-bar {

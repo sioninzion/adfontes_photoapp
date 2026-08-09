@@ -9,7 +9,7 @@
 // CACHE_NAME 버전을 올려서 오래된 캐시를 확실히 폐기한다.
 // ---------------------------------------------------------------------------
 
-const CACHE_NAME = "life4cut-shell-v7";
+const CACHE_NAME = "life4cut-shell-v9";
 
 const PRECACHE_URLS = [
   "./",
@@ -27,6 +27,7 @@ const PRECACHE_URLS = [
   "./js/qr.js",
   "./js/app.js",
   "./js/verseRail.js",
+  "./js/driveSave.js",
   "./js/vendor/qrcode.js",
   "./assets/fonts/OkDanDan-Bold.ttf",
   "./assets/fonts/OngeulipUiyeon-Regular.ttf",

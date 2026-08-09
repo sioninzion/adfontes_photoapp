@@ -51,6 +51,12 @@ cloudinary: {
 - Cloudinary 대시보드(Settings → Upload → Upload presets)에서 `life4cut_unsigned` 프리셋이 **Unsigned**로 설정되어 있어야 하고, Asset Folder가 `summer-retreat-2026`으로 지정되어 있어야 합니다(이 프리셋 설정 자체는 Cloudinary 콘솔에서 미리 해두는 것이며, 이 저장소 코드로 만들 수 있는 부분이 아닙니다).
 - 다른 Cloudinary 계정을 쓰려면 `cloudName`, `uploadPreset` 값만 바꾸면 됩니다.
 
+### 운영자용 Google Drive 백업
+
+- 참가자에게 사진을 전달하는 Cloudinary/QR 흐름과는 완전히 별개로, **결과 화면의 "사진 저장" 버튼**을 직접 눌렀을 때만 완성 이미지를 Google Drive(Apps Script 웹앱)에도 백업합니다. 자동으로 올라가지 않습니다.
+- Apps Script 웹앱 주소는 `js/driveSave.js` 상단의 `APPS_SCRIPT_URL` 하나로 관리됩니다. 다른 Apps Script로 바꾸려면 이 값만 수정하면 됩니다.
+- 같은 결과물을 두 번 이상 올리지 않도록, 저장에 성공하면 버튼이 "저장 완료 ✓"로 바뀌며 비활성화되고, 새로 촬영을 시작해야 다시 저장할 수 있습니다.
+
 ## 5. 프레임 추가/수정 방법
 
 프레임은 `js/config.js`의 `FRAMES` 배열 하나로 관리됩니다. 실제 디자인된 PNG(2x2 그리드, 사진이 들어갈 4개의 투명 구멍 + 로고/문구가 이미 그려져 있는 형태)를 사용합니다.
@@ -113,6 +119,7 @@ js/
   cloudinary.js           Unsigned Upload
   qr.js                   QR 코드 렌더링 (vendor 라이브러리 wrapper)
   verseRail.js            시작 화면 양옆에 흐르는 성경 말씀 띠 (순수 장식)
+  driveSave.js            운영자용 Google Drive 백업 저장 (결과 화면 "사진 저장" 버튼 전용)
   app.js                  화면 전환/상태 관리, 에러 처리, 자동 초기화 타이머
   vendor/qrcode.js        QR 생성 라이브러리 (MIT, Kazuhiko Arase, 서드파티 코드 그대로 포함)
 view.html                 QR 스캔 시 휴대폰에서 열리는 사진 보기/저장 페이지

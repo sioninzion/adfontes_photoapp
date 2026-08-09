@@ -38,9 +38,13 @@ function buildRibbon(railEl, index, { rotateClass, rotateDeg, direction }) {
   const fontClass = FONT_CLASSES[index % FONT_CLASSES.length];
   textEl.className = `verse-ribbon-text ${rotateClass} ${fontClass}`;
 
-  const joined = buildJoinedText(useEnglish);
-  // 이어붙인 문장을 두 번 반복해야 스크롤이 끊김 없이 순환한다.
-  textEl.textContent = joined + SEPARATOR + joined;
+  // "구절 전체 + 구분자"를 한 단위로 삼아 정확히 두 번 반복한다. (주의:
+  // joined + SEPARATOR + joined 처럼 이어붙이면 앞뒤 절반의 길이가 서로
+  // 달라져서(구분자 하나 차이) 순환 지점에서 화면이 살짝 어긋나 끊겨
+  // 보인다. 완전히 동일한 단위를 두 번 반복해야 절반 지점이 곧 시작
+  // 지점과 100% 동일해져서 이음매 없이 순환한다.)
+  const unit = buildJoinedText(useEnglish) + SEPARATOR;
+  textEl.textContent = unit + unit;
 
   ribbon.appendChild(textEl);
   railEl.appendChild(ribbon);

@@ -13,6 +13,7 @@ import { uploadToCloudinary } from "./cloudinary.js";
 import { renderQrCode } from "./qr.js";
 import { canvasToBlob } from "./utils.js";
 import { initVerseRails } from "./verseRail.js";
+import { convertFinalImageToPngDataUrl, uploadFinalImageToDrive } from "./driveSave.js";
 
 // ---------------------------------------------------------------------------
 // DOM 참조
@@ -60,6 +61,7 @@ const resultFinalImage = document.getElementById("result-final-image");
 const resultQrContainer = document.getElementById("result-qr-container");
 const resultQrRetryButton = document.getElementById("result-qr-retry-button");
 const resultRestartButton = document.getElementById("result-restart-button");
+const resultDriveSaveButton = document.getElementById("result-drive-save-button");
 const resultExtendButton = document.getElementById("result-extend-button");
 const resultIdleBar = document.getElementById("result-idle-bar");
 const resultIdleSeconds = document.getElementById("result-idle-seconds");
@@ -75,12 +77,14 @@ const state = {
   finalBlob: null,
   finalObjectUrl: null,
   secureUrl: null,
-  uploadFailureMode: null // 'render' | 'upload'
+  uploadFailureMode: null, // 'render' | 'upload'
+  driveSaved: false // 운영자용 Drive 백업 중복 저장 방지 플래그
 };
 
 let isStarting = false;
 let isFinishing = false;
 let isUploading = false;
+let isDriveSaving = false;
 let idleIntervalId = null;
 let idleRemaining = 0;
 
@@ -317,6 +321,7 @@ function handleRetryUpload() {
 function showResult() {
   resultFinalImage.src = state.finalObjectUrl;
   renderResultQr();
+  resetDriveSaveButtonUI();
   showScreen("result");
   startIdleWatch();
 }
@@ -337,6 +342,44 @@ function renderResultQr() {
     renderQrCode(resultQrContainer, buildQrTargetUrl(state.secureUrl), 320);
   } catch (err) {
     resultQrContainer.innerHTML = '<p class="qr-error">QR 코드를 생성하지 못했습니다.</p>';
+  }
+}
+
+// ---------------------------------------------------------------------------
+// 운영자용 Google Drive 백업 저장 (참가자용 QR 다운로드와는 완전히 별개 기능).
+// 버튼을 직접 눌렀을 때만 실행되며, 자동 업로드는 하지 않는다.
+// ---------------------------------------------------------------------------
+function resetDriveSaveButtonUI() {
+  resultDriveSaveButton.disabled = false;
+  resultDriveSaveButton.textContent = "사진 저장";
+  resultDriveSaveButton.classList.remove("is-success", "is-error");
+}
+
+async function handleDriveSave() {
+  if (isDriveSaving) return; // 저장 중 중복 클릭 방지
+  if (state.driveSaved) return; // 이미 이 결과물은 저장 완료됨 - 중복 업로드 방지
+  if (!state.finalObjectUrl) return;
+
+  isDriveSaving = true;
+  resultDriveSaveButton.disabled = true;
+  resultDriveSaveButton.classList.remove("is-success", "is-error");
+  resultDriveSaveButton.textContent = "저장 중...";
+
+  try {
+    const pngDataUrl = await convertFinalImageToPngDataUrl(state.finalObjectUrl);
+    await uploadFinalImageToDrive(pngDataUrl);
+
+    state.driveSaved = true;
+    resultDriveSaveButton.textContent = "저장 완료 ✓";
+    resultDriveSaveButton.classList.add("is-success");
+    resultDriveSaveButton.disabled = true; // 저장 완료 후에는 다시 누를 필요가 없음(중복 저장 방지)
+  } catch (err) {
+    resultDriveSaveButton.textContent = "저장 실패 - 다시 시도";
+    resultDriveSaveButton.classList.add("is-error");
+    resultDriveSaveButton.disabled = false; // 다시 시도할 수 있어야 한다
+    showToast("사진 저장에 실패했습니다. 다시 시도해주세요.");
+  } finally {
+    isDriveSaving = false;
   }
 }
 
@@ -387,8 +430,10 @@ function resetSession() {
   state.finalObjectUrl = null;
   state.secureUrl = null;
   state.uploadFailureMode = null;
+  state.driveSaved = false; // 새 촬영이 시작되면 다음 결과물은 다시 저장할 수 있어야 한다
 
   resultQrContainer.innerHTML = "";
+  resetDriveSaveButtonUI();
   showScreen("start");
 }
 
@@ -403,6 +448,7 @@ uploadRetryButton.addEventListener("click", handleRetryUpload);
 resultQrRetryButton.addEventListener("click", renderResultQr);
 resultRestartButton.addEventListener("click", resetSession);
 resultExtendButton.addEventListener("click", handleExtendIdle);
+resultDriveSaveButton.addEventListener("click", handleDriveSave);
 
 // 결과 화면에서 아무 터치가 있으면 자동 초기화 타이머를 리셋한다
 screens.result.addEventListener("pointerdown", () => {

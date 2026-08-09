@@ -6,7 +6,7 @@
 <title>2026 여름수련회 인생네컷</title>
 
 <meta name="description" content="2026 여름수련회 인생네컷 포토부스" />
-<meta name="theme-color" content="#2fb595" />
+<meta name="theme-color" content="#0080e6" />
 
 <!-- iOS 홈 화면 추가용 -->
 <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -128,10 +128,11 @@
       <button id="result-qr-retry-button" type="button" class="btn btn-secondary">QR 다시 만들기</button>
     </div>
   </div>
-  <button id="result-restart-button" type="button" class="btn btn-primary btn-huge result-restart-button">처음으로</button>
-  <div id="result-idle-banner" class="idle-banner hidden">
-    <span id="result-idle-seconds">10</span>초 후 처음 화면으로 돌아갑니다
+  <div id="result-idle-bar" class="idle-bar">
+    <span class="idle-bar-text"><span id="result-idle-seconds">60</span>초 후 처음 화면으로 돌아갑니다</span>
+    <button id="result-extend-button" type="button" class="btn btn-secondary btn-small">시간 연장</button>
   </div>
+  <button id="result-restart-button" type="button" class="btn btn-primary btn-huge result-restart-button">처음으로</button>
 </section>
 
 <div id="global-error-toast" class="toast" role="alert"></div>

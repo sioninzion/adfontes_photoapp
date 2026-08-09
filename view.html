@@ -1,0 +1,136 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+<title>자양교회 여름수련회 인생네컷</title>
+<meta name="theme-color" content="#0080e6" />
+<style>
+  * { box-sizing: border-box; }
+  html, body {
+    margin: 0;
+    padding: 0;
+    min-height: 100%;
+    background: #eaf4ff;
+    color: #123a6b;
+    font-family: -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
+  }
+  .wrap {
+    max-width: 480px;
+    margin: 0 auto;
+    padding: 32px 20px 48px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+  }
+  .wrap.hidden { display: none; }
+  h1 {
+    font-size: 1.3rem;
+    margin: 0 0 20px;
+    color: #0080e6;
+  }
+  .photo-card {
+    width: 100%;
+    background: #ffffff;
+    border-radius: 20px;
+    padding: 10px;
+    box-shadow: 0 8px 28px rgba(0, 60, 120, 0.15);
+    margin-bottom: 24px;
+  }
+  .photo-card img {
+    display: block;
+    width: 100%;
+    height: auto;
+    border-radius: 12px;
+    background: #f1f1f1;
+  }
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    min-height: 64px;
+    padding: 0 24px;
+    background: #0080e6;
+    color: #ffffff;
+    font-size: 1.15rem;
+    font-weight: 700;
+    text-decoration: none;
+    border-radius: 18px;
+    box-shadow: 0 5px 0 #0068bd;
+  }
+  .btn:active {
+    transform: translateY(3px);
+    box-shadow: 0 2px 0 #0068bd;
+  }
+  .hint {
+    font-size: 0.9rem;
+    color: #4b6f95;
+    margin: 16px 0 0;
+    line-height: 1.6;
+  }
+  .brand {
+    margin-top: 36px;
+    font-size: 0.85rem;
+    color: #6a89ac;
+  }
+  .error {
+    max-width: 480px;
+    margin: 60px auto 0;
+    padding: 0 24px;
+    text-align: center;
+    color: #7a2340;
+    font-size: 1.05rem;
+    line-height: 1.7;
+  }
+  .error.hidden { display: none; }
+</style>
+</head>
+<body>
+
+<div id="wrap" class="wrap">
+  <h1>2026 자양교회 여름수련회<br />인생네컷</h1>
+  <div class="photo-card">
+    <img id="photo" alt="인생네컷 사진" />
+  </div>
+  <a id="save-btn" class="btn" download="jayang-life4cut.jpg">사진 저장하기</a>
+  <p class="hint">저장 버튼을 눌러도 안 되면, 사진을 길게 눌러<br />"이미지 저장"을 선택해주세요</p>
+  <p class="brand">JAYANG YOUTH · 2026.08.13~15</p>
+</div>
+
+<div id="error" class="error hidden">
+  사진을 불러올 수 없습니다.<br />QR 코드를 다시 스캔해주세요.
+</div>
+
+<script>
+  function showError() {
+    document.getElementById("wrap").classList.add("hidden");
+    document.getElementById("error").classList.remove("hidden");
+  }
+
+  var params = new URLSearchParams(window.location.search);
+  var src = params.get("src");
+
+  if (!src) {
+    showError();
+  } else {
+    try {
+      var url = new URL(src);
+      if (url.protocol !== "https:" && url.protocol !== "http:") throw new Error("invalid protocol");
+
+      var img = document.getElementById("photo");
+      img.onerror = showError;
+      img.src = url.href;
+
+      // Cloudinary fl_attachment 플래그를 넣으면 브라우저가 새 탭에 열지 않고
+      // 바로 다운로드하도록 Content-Disposition 헤더를 붙여준다.
+      var saveBtn = document.getElementById("save-btn");
+      saveBtn.href = url.href.replace("/upload/", "/upload/fl_attachment/");
+    } catch (err) {
+      showError();
+    }
+  }
+</script>
+</body>
+</html>

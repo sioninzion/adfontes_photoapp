@@ -22,15 +22,16 @@
 }
 
 :root {
-  --color-bg: #fbf9f2;
+  /* 자양교회 여름수련회 프레임(JAYANG YOUTH 로고)과 같은 톤: 여름 하늘/바다 블루 + 태양 옐로 */
+  --color-bg: #eef6ff;
   --color-surface: #ffffff;
-  --color-text: #182420;
-  --color-text-soft: #5c6a63;
-  --color-primary: #1f9d7c;
-  --color-primary-dark: #147a5f;
-  --color-accent: #ffcb3d;
+  --color-text: #123a6b;
+  --color-text-soft: #5d7ea3;
+  --color-primary: #0080e6;
+  --color-primary-dark: #0068bd;
+  --color-accent: #fedd1a;
   --color-danger: #d64545;
-  --color-border: #e5e1d6;
+  --color-border: #d7e6f7;
   --safe-top: env(safe-area-inset-top, 0px);
   --safe-bottom: env(safe-area-inset-bottom, 0px);
   --safe-left: env(safe-area-inset-left, 0px);
@@ -499,7 +500,7 @@ img {
 
 .option-btn.active {
   border-color: var(--color-primary);
-  background: #eafbf5;
+  background: #e6f3ff;
 }
 
 .option-label {
@@ -657,17 +658,45 @@ img {
   flex-shrink: 0;
 }
 
-.idle-banner {
-  position: absolute;
-  bottom: calc(24px + var(--safe-bottom));
-  left: 50%;
-  transform: translateX(-50%);
-  background: rgba(0, 0, 0, 0.75);
-  color: #fff;
-  padding: 12px 24px;
+.idle-bar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  flex-wrap: wrap;
+  padding: 10px 22px;
   border-radius: 999px;
-  font-size: 1rem;
+  background: rgba(0, 0, 0, 0.06);
+  color: var(--color-text-soft);
+  font-size: 0.95rem;
   font-weight: 600;
+}
+
+.idle-bar-text {
+  white-space: nowrap;
+}
+
+#result-idle-seconds {
+  font-family: var(--font-heading);
+  color: var(--color-primary-dark);
+  font-weight: 700;
+}
+
+.idle-bar--warning {
+  background: rgba(214, 69, 69, 0.12);
+  color: var(--color-danger);
+}
+
+.idle-bar--warning #result-idle-seconds {
+  color: var(--color-danger);
+}
+
+.btn-small {
+  min-height: 44px;
+  padding: 0 20px;
+  font-size: 0.9rem;
+  border-radius: 999px;
+  border-width: 2px;
 }
 
 /* -------------------------------------------------------------------------

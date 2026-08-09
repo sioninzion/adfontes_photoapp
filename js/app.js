@@ -59,7 +59,8 @@ const resultFinalImage = document.getElementById("result-final-image");
 const resultQrContainer = document.getElementById("result-qr-container");
 const resultQrRetryButton = document.getElementById("result-qr-retry-button");
 const resultRestartButton = document.getElementById("result-restart-button");
-const resultIdleBanner = document.getElementById("result-idle-banner");
+const resultExtendButton = document.getElementById("result-extend-button");
+const resultIdleBar = document.getElementById("result-idle-bar");
 const resultIdleSeconds = document.getElementById("result-idle-seconds");
 
 const globalErrorToast = document.getElementById("global-error-toast");
@@ -122,11 +123,11 @@ function showScreen(name) {
   if (name !== "result") stopIdleWatch();
 }
 
-function showGlobalError(message) {
+function showToast(message) {
   globalErrorToast.textContent = message;
   globalErrorToast.classList.add("toast--visible");
-  clearTimeout(showGlobalError._t);
-  showGlobalError._t = setTimeout(() => {
+  clearTimeout(showToast._t);
+  showToast._t = setTimeout(() => {
     globalErrorToast.classList.remove("toast--visible");
   }, 4000);
 }
@@ -209,7 +210,7 @@ async function handleSelectNext() {
   try {
     await editorScreen.init(state.selectedOrder);
   } catch (err) {
-    showGlobalError("사진을 불러오는 중 문제가 발생했습니다.");
+    showToast("사진을 불러오는 중 문제가 발생했습니다.");
   } finally {
     editFinishButton.disabled = false;
   }
@@ -319,9 +320,20 @@ function showResult() {
   startIdleWatch();
 }
 
+/**
+ * QR로 곧바로 Cloudinary 원본 이미지를 열지 않고, 앱과 같은 톤으로 꾸며진
+ * view.html(사진 + 저장 버튼)을 거치도록 한다. GitHub Pages의 하위 경로
+ * 배포에서도 항상 올바르게 동작하도록 현재 페이지 기준 상대 경로로 만든다.
+ */
+function buildQrTargetUrl(secureUrl) {
+  const target = new URL("view.html", window.location.href);
+  target.searchParams.set("src", secureUrl);
+  return target.href;
+}
+
 function renderResultQr() {
   try {
-    renderQrCode(resultQrContainer, state.secureUrl, 320);
+    renderQrCode(resultQrContainer, buildQrTargetUrl(state.secureUrl), 320);
   } catch (err) {
     resultQrContainer.innerHTML = '<p class="qr-error">QR 코드를 생성하지 못했습니다.</p>';
   }
@@ -330,13 +342,12 @@ function renderResultQr() {
 function startIdleWatch() {
   stopIdleWatch();
   idleRemaining = CONFIG.resultIdleTimeoutSeconds;
-  resultIdleBanner.classList.add("hidden");
+  resultIdleSeconds.textContent = String(idleRemaining);
+  resultIdleBar.classList.remove("idle-bar--warning");
   idleIntervalId = setInterval(() => {
     idleRemaining -= 1;
-    if (idleRemaining <= CONFIG.resultIdleWarningSeconds && idleRemaining > 0) {
-      resultIdleBanner.classList.remove("hidden");
-      resultIdleSeconds.textContent = String(idleRemaining);
-    }
+    resultIdleSeconds.textContent = String(Math.max(idleRemaining, 0));
+    resultIdleBar.classList.toggle("idle-bar--warning", idleRemaining <= CONFIG.resultIdleWarningSeconds);
     if (idleRemaining <= 0) {
       stopIdleWatch();
       resetSession();
@@ -349,7 +360,12 @@ function stopIdleWatch() {
     clearInterval(idleIntervalId);
     idleIntervalId = null;
   }
-  resultIdleBanner.classList.add("hidden");
+}
+
+function handleExtendIdle() {
+  if (!idleIntervalId) return; // 결과 화면이 아니면 무시
+  startIdleWatch();
+  showToast(`시간이 ${CONFIG.resultIdleTimeoutSeconds}초 연장되었습니다.`);
 }
 
 // ---------------------------------------------------------------------------
@@ -385,6 +401,7 @@ editFinishButton.addEventListener("click", handleFinish);
 uploadRetryButton.addEventListener("click", handleRetryUpload);
 resultQrRetryButton.addEventListener("click", renderResultQr);
 resultRestartButton.addEventListener("click", resetSession);
+resultExtendButton.addEventListener("click", handleExtendIdle);
 
 // 결과 화면에서 아무 터치가 있으면 자동 초기화 타이머를 리셋한다
 screens.result.addEventListener("pointerdown", () => {
@@ -393,7 +410,7 @@ screens.result.addEventListener("pointerdown", () => {
 
 // 네트워크가 끊겼다가 돌아왔을 때 안내
 window.addEventListener("offline", () => {
-  showGlobalError("인터넷 연결이 끊어졌습니다.");
+  showToast("인터넷 연결이 끊어졌습니다.");
 });
 
 // ---------------------------------------------------------------------------

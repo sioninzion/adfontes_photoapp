@@ -53,9 +53,9 @@ cloudinary: {
 
 ### 운영자용 Google Drive 백업
 
-- 참가자에게 사진을 전달하는 Cloudinary/QR 흐름과는 완전히 별개로, **결과 화면의 "사진 저장" 버튼**을 직접 눌렀을 때만 완성 이미지를 Google Drive(Apps Script 웹앱)에도 백업합니다. 자동으로 올라가지 않습니다.
+- 참가자에게 사진을 전달하는 Cloudinary/QR 흐름과는 완전히 별개로, **결과 화면에 도달하면 자동으로** 완성 이미지를 Google Drive(Apps Script 웹앱)에도 백업합니다. 화면에는 버튼이나 안내 문구가 따로 없습니다.
 - Apps Script 웹앱 주소는 `js/driveSave.js` 상단의 `APPS_SCRIPT_URL` 하나로 관리됩니다. 다른 Apps Script로 바꾸려면 이 값만 수정하면 됩니다.
-- 같은 결과물을 두 번 이상 올리지 않도록, 저장에 성공하면 버튼이 "저장 완료 ✓"로 바뀌며 비활성화되고, 새로 촬영을 시작해야 다시 저장할 수 있습니다.
+- 같은 결과물을 두 번 이상 올리지 않도록 내부 플래그로 중복 저장을 막으며, 새로 촬영을 시작해야 다음 결과물을 다시 저장할 수 있습니다.
 
 ## 5. 프레임 추가/수정 방법
 
@@ -118,7 +118,7 @@ js/
   renderer.js             최종 합성 로직 (미리보기/최종 출력이 공유하는 단일 진실 소스)
   cloudinary.js           Unsigned Upload
   qr.js                   QR 코드 렌더링 (vendor 라이브러리 wrapper)
-  driveSave.js            운영자용 Google Drive 백업 저장 (결과 화면 "사진 저장" 버튼 전용)
+  driveSave.js            운영자용 Google Drive 백업 저장 (결과 화면 도달 시 자동 실행)
   app.js                  화면 전환/상태 관리, 에러 처리, 자동 초기화 타이머
   vendor/qrcode.js        QR 생성 라이브러리 (MIT, Kazuhiko Arase, 서드파티 코드 그대로 포함)
 view.html                 QR 스캔 시 휴대폰에서 열리는 사진 보기/저장 페이지

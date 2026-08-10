@@ -169,6 +169,10 @@ img {
   text-align: center;
 }
 
+#start-button {
+  margin-top: 22px; /* 제목 바로 아래보다 조금 더 아래로 내린다 */
+}
+
 .event-title {
   font-family: var(--font-heading);
   line-height: 1.25;
@@ -267,9 +271,9 @@ img {
   }
 }
 
-/* 태양 +30%, 구름 +20%, God's kids +40%를 두 번 적용한 누적 크기 */
+/* 태양 +30%, 구름 +20%, God's kids +40%를 두 번 적용 + 태양 추가 +10% 누적 크기 */
 .decor-sun {
-  width: clamp(108px, 15.2vw, 203px);
+  width: clamp(119px, 16.7vw, 223px);
   height: auto;
 }
 
@@ -306,7 +310,11 @@ img {
 .decor-start-sun { top: 4%; left: 6%; }
 .decor-start-cloud { top: 5%; right: 7%; }
 .decor-start-cloud-2 { top: 22%; right: 3%; left: auto; }
-.decor-start-godskid { top: 72%; left: 3%; bottom: auto; }
+.decor-start-cloud-3 { top: 26%; left: 2%; }
+/* 로고 이미지가 커지면서 제목이 화면 대부분을 차지하므로, 세로로 자리를
+   찾는 대신 제목 글자 영역(가로 353~826px 대역) 바깥 왼쪽으로 완전히
+   벗어나게 배치해 항상 온전히 보이도록 한다 */
+.decor-start-godskid { top: 42%; left: -4.4%; bottom: auto; }
 .decor-start-camera { top: 48%; right: 4%; }
 
 .decor-start-particle-1 { top: 16%; left: 3%; }

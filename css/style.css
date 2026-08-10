@@ -311,10 +311,10 @@ img {
 .decor-start-cloud { top: 5%; right: 7%; }
 .decor-start-cloud-2 { top: 22%; right: 3%; left: auto; }
 .decor-start-cloud-3 { top: 26%; left: 2%; }
-/* 로고 이미지가 커지면서 제목이 화면 대부분을 차지하므로, 세로로 자리를
-   찾는 대신 제목 글자 영역(가로 353~826px 대역) 바깥 왼쪽으로 완전히
-   벗어나게 배치해 항상 온전히 보이도록 한다 */
-.decor-start-godskid { top: 42%; left: -4.4%; bottom: auto; }
+/* 화면 왼쪽 끝에 걸쳐 잘리지 않도록, 촬영 시작 버튼의 왼쪽 아래에 자리하게
+   배치한다(버튼과는 가로로만 겹치지 않게 두고, 제목과는 세로로 겹치지 않게
+   버튼 시작 높이 아래에서 시작한다) */
+.decor-start-godskid { top: 72%; left: 3%; bottom: auto; }
 .decor-start-camera { top: 48%; right: 4%; }
 
 .decor-start-particle-1 { top: 16%; left: 3%; }

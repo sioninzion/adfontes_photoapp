@@ -8,6 +8,7 @@ export const CONFIG = {
   photoCount: 6,
   selectedPhotoCount: 4,
   countdownSeconds: 3,
+  firstCountdownSeconds: 5, // 첫 번째 컷만 준비 시간을 더 길게 준다
   captureFreezeMs: 550, // 촬영 직후 결과를 잠깐 보여주는 시간
 
   // 촬영 비율: 아이패드를 가로로 들든 세로로 들든 항상 이 "세로가 긴" 비율로

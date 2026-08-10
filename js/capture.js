@@ -117,7 +117,7 @@ export class CaptureScreen {
       if (this.cancelled) return null;
       this._renderProgress(i + 1);
 
-      await this._runCountdown();
+      await this._runCountdown(i === 0 ? CONFIG.firstCountdownSeconds : CONFIG.countdownSeconds);
       if (this.cancelled) return null;
 
       const photo = await this._captureFrame(i);
@@ -138,9 +138,9 @@ export class CaptureScreen {
     this.progressEl.textContent = `PHOTO ${current} / ${CONFIG.photoCount}`;
   }
 
-  _runCountdown() {
+  _runCountdown(seconds) {
     return new Promise((resolve) => {
-      let remaining = CONFIG.countdownSeconds;
+      let remaining = seconds;
       this._renderCountdownNumber(remaining);
 
       this._timer = setInterval(() => {

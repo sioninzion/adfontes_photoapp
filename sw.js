@@ -9,7 +9,7 @@
 // CACHE_NAME 버전을 올려서 오래된 캐시를 확실히 폐기한다.
 // ---------------------------------------------------------------------------
 
-const CACHE_NAME = "life4cut-shell-v23";
+const CACHE_NAME = "life4cut-shell-v24";
 
 const PRECACHE_URLS = [
   "./",
@@ -39,6 +39,7 @@ const PRECACHE_URLS = [
   "./assets/decor/particle-2.png",
   "./assets/decor/godskid.png",
   "./assets/decor/camera.png",
+  "./assets/mainlogo.png",
   "./assets/icons/icon-180.png",
   "./assets/icons/icon-192.png",
   "./assets/icons/icon-512.png",

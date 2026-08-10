@@ -191,11 +191,14 @@ img {
   font-size: clamp(1.5rem, 3.4vw, 2.6rem);
 }
 
-.event-title-line--brand {
-  color: #ffffff;
-  font-size: clamp(2rem, 4.6vw, 3.6rem);
-  letter-spacing: 0.14em;
-  text-shadow: 0 8px 16px rgba(18, 58, 107, 0.28), 0 0 18px rgba(63, 197, 255, 0.7);
+/* AD FONTES 로고 이미지: 기존 텍스트 가로 길이와 같은 폭의 정사각형에 맞춘다
+   (327px @1180px 뷰포트 기준 = font-size 대비 약 6.03배 비율에서 역산) */
+.event-logo {
+  display: block;
+  width: clamp(190px, 27.7vw, 348px);
+  height: auto;
+  filter: drop-shadow(0 8px 16px rgba(18, 58, 107, 0.28)) drop-shadow(0 0 18px rgba(63, 197, 255, 0.7));
+  animation: title-float 3.6s ease-in-out infinite;
   animation-delay: 0.4s;
 }
 
@@ -210,7 +213,8 @@ img {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .event-title-line {
+  .event-title-line,
+  .event-logo {
     animation: none;
   }
 }
@@ -301,8 +305,8 @@ img {
    (바닥/왼쪽 끝에 딱 붙지 않도록 여유를 둔다) */
 .decor-start-sun { top: 4%; left: 6%; }
 .decor-start-cloud { top: 5%; right: 7%; }
-.decor-start-cloud-2 { top: 1%; left: 36%; }
-.decor-start-godskid { top: 55%; left: 1%; bottom: auto; }
+.decor-start-cloud-2 { top: 22%; right: 3%; left: auto; }
+.decor-start-godskid { top: 72%; left: 3%; bottom: auto; }
 .decor-start-camera { top: 48%; right: 4%; }
 
 .decor-start-particle-1 { top: 16%; left: 3%; }
